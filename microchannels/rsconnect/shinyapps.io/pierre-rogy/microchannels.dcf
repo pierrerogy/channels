@@ -1,0 +1,13 @@
+name: microchannels
+title: microchannels
+username:
+account: pierre-rogy
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5113017
+bundleId: 5245285
+url: https://pierre-rogy.shinyapps.io/microchannels/
+when: 1636744396.59463
+lastSyncTime: 1636744396.59463
+asMultiple: FALSE
+asStatic: FALSE

@@ -16,48 +16,6 @@ taxdata <-
 # Check data
 str(taxdata)
   
-# Summarise data
-taxdata <- 
-  taxdata %>% 
-  mutate(po4 = 
-           ifelse(!is.na(po4_a) & !is.na(po4_b),
-                  (po4_a + po4_b) / 2, 
-                  ifelse(is.na(po4_a) & is.na(po4_b),
-                         NA, 
-                         ifelse(is.na(po4_a), 
-                                po4_b, po4_a))),
-         nh4 = ifelse(!is.na(nh4_a) & !is.na(nh4_b),
-                      (nh4_a + nh4_b) / 2, 
-                      ifelse(is.na(nh4_a) & is.na(nh4_b),
-                             NA, 
-                             ifelse(is.na(nh4_a), 
-                                    nh4_b, nh4_a))),
-         no2 = ifelse(!is.na(no2_a) & !is.na(no2_b),
-                      (no2_a + no2_b) / 2, 
-                      ifelse(is.na(no2_a) & is.na(no2_b),
-                             NA, 
-                             ifelse(is.na(no2_a), 
-                                    no2_b, no2_a))),
-         no3 = ifelse(!is.na(no3_a) & !is.na(no3_b),
-                      (no3_a + no3_b) / 2, 
-                      ifelse(is.na(no3_a) & is.na(no3_b),
-                             NA, 
-                             ifelse(is.na(no3_a), 
-                                    no3_b, no3_a))),
-         bact = ifelse(!is.na(bact_a) & !is.na(bact_b),
-                       (bact_a + bact_b) / 2, 
-                       ifelse(is.na(bact_a) & is.na(bact_b),
-                              NA, 
-                              ifelse(is.na(bact_a), 
-                                     bact_b, bact_a)))) %>% 
-  dplyr::select(-po4_a:-bact_b) %>% 
-  mutate(subsidy_1 = ifelse(feces_1_mg == 0, 
-                            "litter_only", "litter_feces"),
-         subsidy_2 = ifelse(feces_2_mg == 0, 
-                            "litter_only", "litter_feces"),
-         subsidy_3 = ifelse(feces_3_mg == 0, 
-                            "litter_only", "litter_feces")) %>% 
-  unite(subsidy,subsidy_1, subsidy_2, sep = "_", remove = F)
 
 # First - model selection and testing -------------------------------------
 # Get data
