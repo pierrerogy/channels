@@ -789,12 +789,11 @@ chlorophyll <-
               summarise_all(mean) %>% 
               rename(blanks = chlorophyll_raw)) %>% 
   dplyr::mutate(chlorophyll_raw = chlorophyll_raw - blanks) %>% 
-  dplyr::select(-blanks) %>%
   dplyr::filter(cup_number != "acetone") %>% 
   ## Get concentration!
   dplyr::mutate(chlorophyll_ugL = chlorophyll_raw * (solvent_added / v_filtered)) %>% 
   dplyr::select(-v_filtered, -solvent_added, -v_solvent_entered,
-                -v_water_entered, -chlorophyll_raw)
+                -v_water_entered, -chlorophyll_raw, -blanks)
 
 
 
@@ -847,11 +846,7 @@ readr::write_csv(weekly_data,
 # Clean data
 mosquitoes_tidied <- 
   mosquitoes %>% 
-  tidyr::unite(col = "date",
-               day, month, year,
-               sep = "-",
-               remove = T) %>% 
-  dplyr::mutate(date = lubridate::as_date(lubridate::dmy(date))) %>% 
+  dplyr::mutate(date = lubridate::as_date(lubridate::dmy(Day))) %>% 
   ## Add treatments
   dplyr::left_join(treatments,
                    by = "cup_number") %>%
@@ -907,66 +902,3 @@ for(i in index_vec){
 }
 par(mfrow = c(1,1))
 
-
-# Test plots --------------------------------------------------------------
-dats <- 
-  get_those_dats(
-    y = "Mosquito death", 
-    x = "Weekly measurements", 
-    facet_par = "Resource", 
-    experiment = "Experiment 2",
-    exp1 = exp1,
-    exp2 = exp2, 
-    mosquitoes = mosquitoes)
-lineplot1 <-
-  ggplot(data = dats,
-         aes(x = x,
-             y = y,
-             group = sample_id)) +
-  labs(x = NULL, y = NULL, title = NULL) +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  ggtitle(paste0("Experiment 1", ", ", "Bacteria")) +
-geom_line(data = dats,
-          aes(x = x,
-              y = y,
-              color = col,
-              linetype = lty)) +
-  facet_grid(~facet) +
-  scale_colour_discrete(name = NULL) +
-  scale_linetype_discrete(name = NULL)
-
-
-  ggplot(data = dats,
-         aes(x = x,
-             y = y, 
-             group = sample)) +
-  geom_line(data = dats,
-            aes(x = x,
-                y = y,
-                color = diff_var,
-                linetype = shading)) +
-    facet_wrap(~facet)
-  ylim(0,6) +
-  ylab("Mean number of dead larvae per cup") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
-
-ggplot(data = exp2 %>% 
-         dplyr::select(date, cup_number, shading, subsidy, larvae),
-       aes(x = date,
-           y = no2)) +
-  geom_line(data = exp2 %>% 
-              dplyr::select(date, cup_number, shading, subsidy, larvae, no2),
-            aes(x = date,
-                y = no2,
-                group = cup_number,
-                color = subsidy,
-                linetype = shading)) +
-  facet_grid(~larvae) +
-  #ylab("Mean number of dead larvae per cup") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())

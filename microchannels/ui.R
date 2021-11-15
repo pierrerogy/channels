@@ -73,7 +73,7 @@ shinyUI(dashboardPage(
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
                                        "Mosquito death",
-                                       "Mosquito emergence/pupation"),
+                                       "Mosquito pupation"),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 1
@@ -107,7 +107,7 @@ shinyUI(dashboardPage(
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
                                        "Mosquito death",
-                                       "Mosquito emergence/pupation"),
+                                       "Mosquito pupation"),
                            inline = TRUE)
                    ) # end box 1
             ) # end column 2
@@ -177,7 +177,7 @@ shinyUI(dashboardPage(
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
                                        "Mosquito death",
-                                       "Mosquito emergence/pupation"),
+                                       "Mosquito pupation"),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 1
@@ -211,7 +211,7 @@ shinyUI(dashboardPage(
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
                                        "Mosquito death",
-                                       "Mosquito emergence/pupation"),
+                                       "Mosquito pupation"),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 2

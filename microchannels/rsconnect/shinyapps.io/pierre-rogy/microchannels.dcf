@@ -5,9 +5,9 @@ account: pierre-rogy
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5113017
-bundleId: 5245285
+bundleId: 5251712
 url: https://pierre-rogy.shinyapps.io/microchannels/
-when: 1636744396.59463
-lastSyncTime: 1636744396.59463
+when: 1636939014.83601
+lastSyncTime: 1636939014.83601
 asMultiple: FALSE
 asStatic: FALSE

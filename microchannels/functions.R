@@ -137,11 +137,11 @@ get_those_dats <- function(y, x, facet_par, experiment,
                         sample_id = cup_number)
       } else  
         
-  # If mosquito emergence/pupation is asked
-  if(y == "Mosquito emergence/pupation"){
+  # If mosquito pupation is asked
+  if(y == "Mosquito pupation"){
     dats <- 
       mosquitoes %>%
-      dplyr::filter(event %in% c("pupation", "emergence")) %>% 
+      dplyr::filter(event == "pupation") %>% 
       dplyr::select(date, cup_number, event, shading, subsidy, larvae) %>% 
       dplyr::group_by(date, event, cup_number, shading, subsidy, larvae) %>%
       dplyr::tally() %>% 
@@ -209,7 +209,7 @@ get_y_label <- function(y){
                 # If chlorophyll is asked
                 if(y == "Algae"){
                   lab <- 
-                    "PO4 (umol.L)"
+                    "Chlorophyll (ug.L)"
                 } else
                   
                   # If mosquito death is asked
@@ -218,10 +218,10 @@ get_y_label <- function(y){
                       "n dead larvae found"
                   } else  
                     
-                    # If mosquito emergence/pupation is asked
-                    if(y == "Mosquito emergence/pupation"){
+                    # If mosquito pupation is asked
+                    if(y == "Mosquito pupation"){
                       lab <- 
-                        "TBD"
+                        "n pupae found"
                       
                     }      
   

@@ -128,10 +128,10 @@ shinyServer(function(input, output) {
         
         if(nrow(plot1_dats()) > 1){
           ## Plot type depends on y
-          if(input$y1 %notin% c("Mosquito emergence/pupation", "Mosquito death")){
+          if(input$y1 %notin% c("Mosquito pupation", "Mosquito death")){
             lineplot1 <-
               line_blank_plot(lineplot1,  plot1_dats())} else
-                if(input$y1 %in% c("Mosquito emergence/pupation", "Mosquito death")){
+                if(input$y1 %in% c("Mosquito pupation", "Mosquito death")){
                   lineplot1 <-
                     point_blank_plot(lineplot1,  plot1_dats())}
 
@@ -158,10 +158,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot2_dats()) > 1){
         ## Plot type depends on y
-        if(input$y2 %notin% c("Mosquito emergence/pupation", "Mosquito death")){
+        if(input$y2 %notin% c("Mosquito pupation", "Mosquito death")){
           lineplot2 <-
             line_blank_plot(lineplot2,  plot2_dats())} else
-              if(input$y2 %in% c("Mosquito emergence/pupation", "Mosquito death")){
+              if(input$y2 %in% c("Mosquito pupation", "Mosquito death")){
                 lineplot2 <-
                   point_blank_plot(lineplot2,  plot2_dats())}
         
@@ -190,10 +190,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot3_dats()) > 1){
         ## Plot type depends on y
-        if(input$y3 %notin% c("Mosquito emergence/pupation", "Mosquito death")){
+        if(input$y3 %notin% c("Mosquito pupation", "Mosquito death")){
           lineplot3 <-
             line_blank_plot(lineplot3,  plot3_dats())} else
-              if(input$y3 %in% c("Mosquito emergence/pupation", "Mosquito death")){
+              if(input$y3 %in% c("Mosquito pupation", "Mosquito death")){
                 lineplot3 <-
                   point_blank_plot(lineplot3,  plot3_dats())}
 
@@ -220,10 +220,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot4_dats()) > 1){
         ## Plot type depends on y
-        if(input$y4 %notin% c("Mosquito emergence/pupation", "Mosquito death")){
+        if(input$y4 %notin% c("Mosquito pupation", "Mosquito death")){
           lineplot4 <-
             line_blank_plot(lineplot4,  plot4_dats())} else
-              if(input$y4 %in% c("Mosquito emergence/pupation", "Mosquito death")){
+              if(input$y4 %in% c("Mosquito pupation", "Mosquito death")){
                 lineplot4 <-
                   point_blank_plot(lineplot4,  plot4_dats())}
 
