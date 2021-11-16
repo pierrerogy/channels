@@ -688,9 +688,13 @@ all_bacteria <-
   dplyr::filter(column != "NA-NA") %>% 
   tidyr::separate(column, into = c("bact_stds", "cup_number"), sep = "-", remove = TRUE) %>% 
   dplyr::filter(!is.na(absorbance)) %>%
-  ## Add week
+  ## Add week and bacterial cell info
   dplyr::left_join(weeks %>% 
-                     dplyr::select(week, date))
+                     dplyr::select(week, date, spheres_per_L)) %>% 
+  dplyr::mutate(bact_stds = as.numeric(bact_stds)) %>% 
+  dplyr::mutate(bact_stds = ifelse(!is.na(bact_stds), 
+                                   bact_stds * spheres_per_L, bact_stds)) %>% 
+  dplyr::select(-spheres_per_L)
 
 # Replace "NA" with actual NA
 all_bacteria[all_bacteria =="NA"] = NA
