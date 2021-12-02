@@ -128,11 +128,11 @@ get_those_dats <- function(y, x, facet_par, experiment,
   if(y == "Mosquito death"){
         dats <- 
           mosquitoes %>% 
-          dplyr::filter(event == "death") %>% 
-          dplyr::select(date, cup_number, event, shading, subsidy, larvae) %>% 
-          dplyr::group_by(date, event, cup_number, shading, subsidy, larvae) %>% 
+          dplyr::filter(!is.na(death)) %>% 
+          dplyr::select(cup_number, death, shading, subsidy, larvae) %>% 
+          dplyr::group_by(death, cup_number, shading, subsidy, larvae) %>% 
           dplyr::tally() %>% 
-          dplyr::rename(x = date,
+          dplyr::rename(x = death,
                         y = n,
                         sample_id = cup_number)
       } else  
@@ -141,15 +141,45 @@ get_those_dats <- function(y, x, facet_par, experiment,
   if(y == "Mosquito pupation"){
     dats <- 
       mosquitoes %>%
-      dplyr::filter(event == "pupation") %>% 
-      dplyr::select(date, cup_number, event, shading, subsidy, larvae) %>% 
-      dplyr::group_by(date, event, cup_number, shading, subsidy, larvae) %>%
+      dplyr::filter(!is.na(pupation)) %>% 
+      dplyr::select(cup_number, pupation, shading, subsidy, larvae) %>% 
+      dplyr::group_by(pupation, cup_number, shading, subsidy, larvae) %>% 
       dplyr::tally() %>% 
-      dplyr::rename(x = date,
+      dplyr::rename(x = pupation,
                     y = n,
                     sample_id = cup_number)
     
-        }      
+  }  else
+  
+  # If mosquito time to death
+  if(y == "Time to death"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(time_death)) %>% 
+      dplyr::select(cup_number, time_death, shading, subsidy, larvae) %>% 
+      dplyr::group_by(time_death, cup_number, shading, subsidy, larvae) %>% 
+      dplyr::tally() %>% 
+      dplyr::rename(x = time_death,
+                    y = n) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  } else
+  
+  # If mosquito time to emergence
+  if(y == "Time to emergence"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(time_emergence)) %>% 
+      dplyr::select(cup_number, time_emergence, shading, subsidy, larvae) %>% 
+      dplyr::group_by(time_emergence, cup_number, shading, subsidy, larvae) %>% 
+      dplyr::tally() %>% 
+      dplyr::rename(x = time_emergence,
+                    y = n) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  } 
   
   # Return data
   return(dats) 
@@ -215,15 +245,31 @@ get_y_label <- function(y){
                   # If mosquito death is asked
                   if(y == "Mosquito death"){
                     lab <- 
-                      "n dead larvae found"
+                      "n dead larvae found per cup"
                   } else  
                     
                     # If mosquito pupation is asked
                     if(y == "Mosquito pupation"){
                       lab <- 
-                        "n pupae found"
+                        "n pupae found per cup"
                       
-                    }      
+                    }  else
+                      
+                      # If time to death is asked
+                      if(y == "Time to death"){
+                        lab <- 
+                          "n"
+                        
+                      }  else
+                        
+                        # If time to emergence is asked
+                        if(y == "Time to emergence"){
+                          lab <- 
+                            "n"
+                          
+                        }
+
+  
   
   # Return label
   return(lab) 
@@ -238,12 +284,17 @@ get_y_label <- function(y){
 
 
 # Select x axis label -----------------------------------------------------
-get_x_label <- function(x){
+get_x_label <- function(x, y){
   
   # If weekly measurements are asked
   if(x == "Weekly measurements"){
     lab <-
-      "Date"
+      "Day of the year"
+  }
+  # Small exception with time to death/emergence
+  if(stringr::str_detect(y, "Time")){
+    lab <-
+      "Number of days"
   }
   
   # If time series is asked
@@ -267,15 +318,14 @@ get_x_label <- function(x){
 
 # Make blank plot ---------------------------------------------------------
 blank_plot <- function(dats){
-  ## Plot with nothing but x-axis text will be at 45degrees
+  ## Plot with nothing but 
   return(ggplot(data = dats,
          aes(x = x,
              y = y,
              group = sample_id)) +
     labs(x = NULL, y = NULL, title = NULL) +
     theme_bw() +
-    theme(axis.text.x = element_text(angle = 45),
-          panel.grid.major = element_blank(),
+    theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())) 
   
   

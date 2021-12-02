@@ -1125,7 +1125,7 @@ weekly_measurements <-
   ## Add date
   dplyr::left_join(visits %>% 
                      dplyr::select(visit_id, date)) %>% 
-  dplyr::mutate(date = lubridate::as_date(lubridate::ymd(date))) 
+  dplyr::mutate(date = lubridate::yday(lubridate::as_date(lubridate::ymd(date)))) 
 
 write.csv(weekly_measurements,
           "data_exp1/bromeliad_tax_exp.csv",

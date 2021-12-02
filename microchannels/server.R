@@ -128,10 +128,12 @@ shinyServer(function(input, output) {
         
         if(nrow(plot1_dats()) > 1){
           ## Plot type depends on y
-          if(input$y1 %notin% c("Mosquito pupation", "Mosquito death")){
+          if(input$y1 %notin% c("Mosquito pupation", "Mosquito death",
+                                "Time to death", "Time to emergence")){
             lineplot1 <-
               line_blank_plot(lineplot1,  plot1_dats())} else
-                if(input$y1 %in% c("Mosquito pupation", "Mosquito death")){
+                if(input$y1 %in% c("Mosquito pupation", "Mosquito death",
+                                   "Time to death", "Time to emergence")){
                   lineplot1 <-
                     point_blank_plot(lineplot1,  plot1_dats())}
 
@@ -143,7 +145,7 @@ shinyServer(function(input, output) {
         # Print the plot with correct labels
         lineplot1 +
           ylab(get_y_label(input$y1)) +
-          xlab(get_x_label(input$x1))
+          xlab(get_x_label(input$x1, input$y1))
         
     }) # end renderplot command
     
@@ -158,10 +160,12 @@ shinyServer(function(input, output) {
       
       if(nrow(plot2_dats()) > 1){
         ## Plot type depends on y
-        if(input$y2 %notin% c("Mosquito pupation", "Mosquito death")){
+        if(input$y2 %notin% c("Mosquito pupation", "Mosquito death",
+                              "Time to death", "Time to emergence")){
           lineplot2 <-
             line_blank_plot(lineplot2,  plot2_dats())} else
-              if(input$y2 %in% c("Mosquito pupation", "Mosquito death")){
+              if(input$y2 %in% c("Mosquito pupation", "Mosquito death",
+                                 "Time to death", "Time to emergence")){
                 lineplot2 <-
                   point_blank_plot(lineplot2,  plot2_dats())}
         
@@ -175,7 +179,7 @@ shinyServer(function(input, output) {
       # Print the plot with correct labels
       lineplot2 +
         ylab(get_y_label(input$y2)) +
-        xlab(get_x_label(input$x2))
+        xlab(get_x_label(input$x2, input$y2))
         
     }) # end renderplot command
     
@@ -190,10 +194,12 @@ shinyServer(function(input, output) {
       
       if(nrow(plot3_dats()) > 1){
         ## Plot type depends on y
-        if(input$y3 %notin% c("Mosquito pupation", "Mosquito death")){
+        if(input$y3 %notin% c("Mosquito pupation", "Mosquito death",
+                              "Time to death", "Time to emergence")){
           lineplot3 <-
             line_blank_plot(lineplot3,  plot3_dats())} else
-              if(input$y3 %in% c("Mosquito pupation", "Mosquito death")){
+              if(input$y3 %in% c("Mosquito pupation", "Mosquito death",
+                                 "Time to death", "Time to emergence")){
                 lineplot3 <-
                   point_blank_plot(lineplot3,  plot3_dats())}
 
@@ -205,7 +211,7 @@ shinyServer(function(input, output) {
       # Print the plot with correct labels
       lineplot3 +
         ylab(get_y_label(input$y3)) +
-        xlab(get_x_label(input$x3))
+        xlab(get_x_label(input$x3, input$y3))
         
     }) # end renderplot command
     
@@ -220,10 +226,12 @@ shinyServer(function(input, output) {
       
       if(nrow(plot4_dats()) > 1){
         ## Plot type depends on y
-        if(input$y4 %notin% c("Mosquito pupation", "Mosquito death")){
+        if(input$y4 %notin% c("Mosquito pupation", "Mosquito death",
+                              "Time to death", "Time to emergence")){
           lineplot4 <-
             line_blank_plot(lineplot4,  plot4_dats())} else
-              if(input$y4 %in% c("Mosquito pupation", "Mosquito death")){
+              if(input$y4 %in% c("Mosquito pupation", "Mosquito death",
+                                 "Time to death", "Time to emergence")){
                 lineplot4 <-
                   point_blank_plot(lineplot4,  plot4_dats())}
 
@@ -235,7 +243,7 @@ shinyServer(function(input, output) {
       # Print the plot with correct labels
       lineplot4  +
         ylab(get_y_label(input$y4)) +
-        xlab(get_x_label(input$x4))
+        xlab(get_x_label(input$x4, input$y4))
         
     }) # end renderplot command
     

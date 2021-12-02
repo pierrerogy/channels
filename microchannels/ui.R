@@ -72,8 +72,9 @@ shinyUI(dashboardPage(
                            choices = c("NO2 (nitrite)", "NO3 (nitrate)",
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death",
-                                       "Mosquito pupation"),
+                                       "Mosquito death", "Mosquito pupation",
+                                       "Time to death", "Time to emergence"
+                                       ),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 1
@@ -106,8 +107,8 @@ shinyUI(dashboardPage(
                            choices = c("NO2 (nitrite)", "NO3 (nitrate)",
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death",
-                                       "Mosquito pupation"),
+                                       "Mosquito death", "Mosquito pupation",
+                                       "Time to death", "Time to emergence"),
                            inline = TRUE)
                    ) # end box 1
             ) # end column 2
@@ -176,8 +177,8 @@ shinyUI(dashboardPage(
                            choices = c("NO2 (nitrite)", "NO3 (nitrate)",
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death",
-                                       "Mosquito pupation"),
+                                       "Mosquito death", "Mosquito pupation",
+                                       "Time to death", "Time to emergence"),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 1
@@ -210,8 +211,8 @@ shinyUI(dashboardPage(
                            choices = c("NO2 (nitrite)", "NO3 (nitrate)",
                                        "NH4 (ammonium)", "PO4 (phosphate)",
                                        "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death",
-                                       "Mosquito pupation"),
+                                       "Mosquito death", "Mosquito pupation",
+                                       "Time to death", "Time to emergence"),
                            inline = TRUE)
                    ) # end box 1
             ), # end column 2
