@@ -131,7 +131,7 @@ shinyServer(function(input, output) {
           if(input$y1 %notin% c("Mosquito pupation", "Mosquito death",
                                 "Time to death", "Time to emergence")){
             lineplot1 <-
-              line_blank_plot(lineplot1,  plot1_dats())} else
+              line_blank_plot(lineplot1,  plot1_dats(), input$y1)} else
                 if(input$y1 %in% c("Mosquito pupation", "Mosquito death",
                                    "Time to death", "Time to emergence")){
                   lineplot1 <-
@@ -163,7 +163,7 @@ shinyServer(function(input, output) {
         if(input$y2 %notin% c("Mosquito pupation", "Mosquito death",
                               "Time to death", "Time to emergence")){
           lineplot2 <-
-            line_blank_plot(lineplot2,  plot2_dats())} else
+            line_blank_plot(lineplot2,  plot2_dats(), input$y2)} else
               if(input$y2 %in% c("Mosquito pupation", "Mosquito death",
                                  "Time to death", "Time to emergence")){
                 lineplot2 <-
@@ -197,7 +197,7 @@ shinyServer(function(input, output) {
         if(input$y3 %notin% c("Mosquito pupation", "Mosquito death",
                               "Time to death", "Time to emergence")){
           lineplot3 <-
-            line_blank_plot(lineplot3,  plot3_dats())} else
+            line_blank_plot(lineplot3,  plot3_dats(), input$y3)} else
               if(input$y3 %in% c("Mosquito pupation", "Mosquito death",
                                  "Time to death", "Time to emergence")){
                 lineplot3 <-
@@ -229,7 +229,7 @@ shinyServer(function(input, output) {
         if(input$y4 %notin% c("Mosquito pupation", "Mosquito death",
                               "Time to death", "Time to emergence")){
           lineplot4 <-
-            line_blank_plot(lineplot4,  plot4_dats())} else
+            line_blank_plot(lineplot4,  plot4_dats(), input$y4)} else
               if(input$y4 %in% c("Mosquito pupation", "Mosquito death",
                                  "Time to death", "Time to emergence")){
                 lineplot4 <-

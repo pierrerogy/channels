@@ -18,9 +18,10 @@ weeks <-
   tidyr::unite(date, year, month, day, sep="", remove = FALSE) %>% 
   ## deal with the leading zero problem
   dplyr::mutate(date = ifelse(date == 2021111, 20211101, 
-                       ifelse(date == 2021118, 20211108,
-                              ifelse(date == 2021123, 20211203,
-                                     date)))) %>% 
+                              ifelse(date == 2021118, 20211108,
+                                     ifelse(date == 2021123, 20211203,
+                                            ifelse(date == 2021123, 20211203,
+                                     date))))) %>% 
   dplyr::mutate(date = as.numeric(date))
 chlorophyll <- 
   readr::read_csv("data_exp2/raw/chlorophyll.csv")
@@ -365,7 +366,8 @@ no3_values <-
   dplyr::left_join(nat_sams, nitrate_mod_parms) %>% 
   dplyr::select(-nat_exp_int, -nat_exp_slope, -int_dist, -slope_dist) %>% 
   dplyr::mutate(no3_con = (no3 - intercept) / slope) %>% 
-  dplyr::mutate(no3_con = ifelse(no3_con < 0, 0, no3_con)) %>% 
+  dplyr::mutate(no3_con = ifelse(no3_con < 0, 0, no3_con),
+                week = as.character(week)) %>% 
   dplyr::select(-no2no3, -no2, -no3, 
                 -intercept, -slope, -mean_zero) %>% 
   tidyr::pivot_wider(values_from = no3_con, names_from = replicate) %>% 

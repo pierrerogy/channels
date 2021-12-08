@@ -151,3 +151,6 @@ Week,Day,cup_number,mosquito_id,event,size_mm,molting?
 5,30/11/2021,15,4,death ,6,N
 5,30/11/2021,14,6,pupation,,
 5,1/12/2021,16,5,death,5,N
+5,3/12/2021,14,6,death,,Y
+5,3/12/2021,16,6,death ,6,N
+5,3/12/2021,6,5,death ,4,N

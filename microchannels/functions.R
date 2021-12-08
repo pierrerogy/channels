@@ -333,18 +333,35 @@ blank_plot <- function(dats){
 
 
 # Add line to  blank plot -------------------------------------------------
-line_blank_plot <- function(blank_plot, dats){
+line_blank_plot <- function(blank_plot, dats, y){
+  
   ## Colour, linetype and facet all depend on the data
-  return(blank_plot +
+  plot <- 
+    blank_plot +
     geom_line(data = dats,
               aes(x = x,
                   y = y,
                   color = col,
                   linetype = lty)) +
-      facet_wrap(~ facet) +
+    facet_wrap(~ facet) +
     ## Remove automatic labels on legend
     scale_colour_discrete(name = NULL) +
-    scale_linetype_discrete(name = NULL))
+    scale_linetype_discrete(name = NULL)
+  
+  ## Now some plots need to be logged, depending on y
+  if(y %in% c("NH4 (ammonium)", "Algae")){
+    plot <- 
+      plot +
+      scale_y_continuous(trans = "log10")
+    
+  }
+    
+  
+  
+  
+  return(plot)
+  
+  
     
   
   
