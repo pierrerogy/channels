@@ -8,7 +8,6 @@ library(modelr)
 library(lubridate)
 library(broom)
 source("R_code/functions.R")
-library(assertr)
 
 
 # Load necessary data
@@ -700,7 +699,7 @@ all_bacteria <-
 # Replace "NA" with actual NA
 all_bacteria[all_bacteria =="NA"] = NA
 
-# C heck on structure of variables & make adjustments as necessary
+# Check on structure of variables & make adjustments as necessary
 str(all_bacteria)
 all_bacteria <- 
   all_bacteria %>% 
@@ -852,7 +851,7 @@ readr::write_csv(weekly_data,
 mosquitoes_tidied <- 
   mosquitoes %>% 
   dplyr::mutate(day = lubridate::as_date(lubridate::dmy(Day))) %>% 
-  dplyr::select(-Day, -`molting?`, -Week) %>% 
+  dplyr::select(-Day, -molting, -Week, -left_wing_mm, -right_wing_mm, -dry_mass_mg, -sex) %>% 
   ## Make day of the year
   dplyr::mutate(day = lubridate::yday(day)) %>% 
   ## make missing dead
@@ -865,11 +864,36 @@ mosquitoes_tidied <-
                      values_fill = NA) %>% 
   ## Add time to death
   dplyr::mutate(time_death = death - lubridate::yday(lubridate::as_date(lubridate::dmy("29/10/2021")))) %>% 
+  ## Add time to pupation
+  dplyr::mutate(time_pupation = pupation - lubridate::yday(lubridate::as_date(lubridate::dmy("29/10/2021")))) %>% 
   ## Add time to emergence
   dplyr::mutate(time_emergence = emergence - lubridate::yday(lubridate::as_date(lubridate::dmy("29/10/2021")))) %>% 
   ## Add treatments
   dplyr::left_join(treatments,
-                   by = "cup_number")
+                   by = "cup_number") %>% 
+  ## Add which week mosquito left the cup
+  dplyr::left_join(mosquitoes %>% 
+                     dplyr::filter(event %in% c("death", "missing", "pupation")) %>% 
+                     dplyr::select(cup_number, mosquito_id, Week) %>% 
+                     ### some mosquitoes died after leaving
+                     dplyr::group_by(cup_number, mosquito_id) %>% 
+                     dplyr::summarise_all(min) %>% 
+                     dplyr::ungroup() %>% 
+                     dplyr::rename(week_of_departure = Week),
+                   by = c("cup_number", 
+                          "mosquito_id")) %>% 
+  ## This one mosquito that was in the wrong cup and that emerged week 2...
+  dplyr::mutate(week_of_departure = ifelse(is.na(week_of_departure),
+                                           2, week_of_departure)) %>% 
+  ## Add wing size
+  dplyr::left_join(mosquitoes %>% 
+                     dplyr::filter(!is.na(sex)) %>% 
+                     dplyr::select(cup_number, mosquito_id,
+                                   left_wing_mm, right_wing_mm, 
+                                   dry_mass_mg, sex),
+                   by = c("cup_number", 
+                          "mosquito_id"))
+
 
 # Save data
 readr::write_csv(mosquitoes_tidied,

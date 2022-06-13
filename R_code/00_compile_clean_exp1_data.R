@@ -889,7 +889,8 @@ all_bacteria2 <-
   dplyr::select(-round) %>% 
   left_join(visits %>% 
               dplyr::select(visit_id, date, spheres_per_L)) %>% 
-  mutate(bact_stds = bact_stds * spheres_per_L) %>% 
+  mutate(bact_stds = ifelse(!is.na(bact_stds), 
+                            bact_stds * spheres_per_L, bact_stds)) %>% 
   dplyr::select(-spheres_per_L)%>% 
   mutate(visit_id = ifelse(grepl("H0_", bact_sam),
                            "H0", 
@@ -946,7 +947,7 @@ all_bacteria2  <-
 # Replace "NA" with actual NA
 all_bacteria2[all_bacteria2 =="NA"] = NA
 
-# C heck on structure of variables & make adjustments as necessary
+# Check on structure of variables & make adjustments as necessary
 str(all_bacteria2)
 all_bacteria2 <- 
   all_bacteria2 %>% 
@@ -1117,10 +1118,10 @@ weekly_measurements <-
                             "litter_only", "litter_feces"),
          subsidy_3 = ifelse(feces_3_mg == 0, 
                             "litter_only", "litter_feces")) %>% 
-  unite(subsidy,subsidy_1, subsidy_2, sep = "_", remove = T) %>% 
+  unite(subsidy,subsidy_1, subsidy_2, sep = "_", remove = F) %>% 
   dplyr::mutate(subsidy = ifelse(subsidy == "NA_NA", subsidy_3,
                                  subsidy)) %>% 
-  dplyr::select(-litter_1_mg, -litter_2_mg, -litter_3_mg,
+  dplyr::select(-litter_1_mg, -litter_2_mg, -litter_3_mg, -subsidy_2,
                 -feces_1_mg, -feces_2_mg, -feces_3_mg, -subsidy_3) %>% 
   ## Add date
   dplyr::left_join(visits %>% 
