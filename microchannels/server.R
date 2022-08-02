@@ -24,25 +24,53 @@ source(here::here("functions.R"))
 `%notin%` <-Negate(`%in%`)
   
 
+# Lists of mosquito variables unique to experiment 2 -------------------------------
+mosq_vars <- 
+  c("Mosquito death", "Mosquito pupation", "Mosquito emergence",
+    "Time to death", "Time to pupation", "Time to emergence",
+    "Larval length at death (mm)", "Dry mass at emergence (mg)",
+    "Average wing length of adult (mm)")
+
+
+# Build server ------------------------------------------------------------
 # Define server logic required to draw a plots
 shinyServer(function(input, output) {
     
     # Read in the prepared data 
-    exp1 <- 
+  exp1 <- 
         read.csv(here::here("appdata", 
                             "bromeliad_tax_exp.csv")) %>% 
         dplyr::rename(temperature_C = temp,
                       bromsquito = vessel,
-                      pH = ph)
+                      pH = ph) %>% 
+        ## Make dissolved inorganic nitrogen column
+        dplyr::mutate(DIN = no2 + no3 + nh4) %>% 
+        ## Remove bromeliads in second part of the experiment
+        ## that received the wrong subsidy
+        dplyr::filter(visit_id %in% c("1", "2", "3", "H0", "H1",
+                                      "H4", "H8", "H24", "H48") |
+                        (visit_id %in% c("4", "5", "6") & 
+                           subsidy %in% c("litter_only_litter_only",
+                                          "litter_feces_litter_feces"))) %>% 
+        ## Put value of subsidy in subsidy_1 for time series data
+        dplyr::mutate(subsidy_1 = ifelse(is.na(subsidy_1),
+                                         subsidy, subsidy_1)) %>% 
+        ## Change name of subsidy column
+        dplyr::select(-subsidy) %>% 
+        dplyr::rename(subsidy = subsidy_1)
     
     exp2 <- 
         read.csv(here::here("appdata", 
                             "weekly_measurements_exp2.csv")) %>% 
-      dplyr::rename(bromsquito = larvae)
+      dplyr::rename(bromsquito = larvae) %>% 
+      ## Make dissolved inorganic nitrogen column
+      dplyr::mutate(DIN = no2 + no3 + nh4)
     
     mosquitoes <- 
         read.csv(here::here("appdata", 
-                            "mosquitoes.csv"))
+                            "mosquitoes.csv")) %>% 
+      ## Add average of two wings
+      dplyr::mutate(wing_length = (left_wing_mm + right_wing_mm)/2)
     
     
     # Make reactive datasets ---------------------------------------------------
@@ -128,12 +156,10 @@ shinyServer(function(input, output) {
         
         if(nrow(plot1_dats()) > 1){
           ## Plot type depends on y
-          if(input$y1 %notin% c("Mosquito pupation", "Mosquito death",
-                                "Time to death", "Time to emergence")){
+          if(input$y1 %notin% mosq_vars){
             lineplot1 <-
               line_blank_plot(lineplot1,  plot1_dats(), input$y1)} else
-                if(input$y1 %in% c("Mosquito pupation", "Mosquito death",
-                                   "Time to death", "Time to emergence")){
+                if(input$y1 %in% mosq_vars){
                   lineplot1 <-
                     point_blank_plot(lineplot1,  plot1_dats())}
 
@@ -160,12 +186,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot2_dats()) > 1){
         ## Plot type depends on y
-        if(input$y2 %notin% c("Mosquito pupation", "Mosquito death",
-                              "Time to death", "Time to emergence")){
+        if(input$y2 %notin% mosq_vars){
           lineplot2 <-
             line_blank_plot(lineplot2,  plot2_dats(), input$y2)} else
-              if(input$y2 %in% c("Mosquito pupation", "Mosquito death",
-                                 "Time to death", "Time to emergence")){
+              if(input$y2 %in% mosq_vars){
                 lineplot2 <-
                   point_blank_plot(lineplot2,  plot2_dats())}
         
@@ -194,12 +218,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot3_dats()) > 1){
         ## Plot type depends on y
-        if(input$y3 %notin% c("Mosquito pupation", "Mosquito death",
-                              "Time to death", "Time to emergence")){
+        if(input$y3 %notin% mosq_vars){
           lineplot3 <-
             line_blank_plot(lineplot3,  plot3_dats(), input$y3)} else
-              if(input$y3 %in% c("Mosquito pupation", "Mosquito death",
-                                 "Time to death", "Time to emergence")){
+              if(input$y3 %in% mosq_vars){
                 lineplot3 <-
                   point_blank_plot(lineplot3,  plot3_dats())}
 
@@ -226,12 +248,10 @@ shinyServer(function(input, output) {
       
       if(nrow(plot4_dats()) > 1){
         ## Plot type depends on y
-        if(input$y4 %notin% c("Mosquito pupation", "Mosquito death",
-                              "Time to death", "Time to emergence")){
+        if(input$y4 %notin% mosq_vars){
           lineplot4 <-
             line_blank_plot(lineplot4,  plot4_dats(), input$y4)} else
-              if(input$y4 %in% c("Mosquito pupation", "Mosquito death",
-                                 "Time to death", "Time to emergence")){
+              if(input$y4 %in% mosq_vars){
                 lineplot4 <-
                   point_blank_plot(lineplot4,  plot4_dats())}
 

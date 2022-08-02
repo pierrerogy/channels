@@ -4,23 +4,37 @@
 library(dplyr)
 library(stringr)
 
-# Select data -------------------------------------------------------------
-get_those_dats <- function(y, x, facet_par, experiment, 
-                           exp1, exp2, mosquitoes){
+
+# Select between facet, colour and line parameters ------------------------
+select_plot_pars <- function(facet_par){
   # Make facet selection flexible
   facet_var <- 
     ifelse(facet_par == "Exposition",
            "shading", ifelse(facet_par == "Resource",
-                      "subsidy", "bromsquito"))
+                             "subsidy", "bromsquito"))
   col_var <- 
     ifelse(facet_par == "Exposition",
            "bromsquito", ifelse(facet_par == "Resource",
-                             "shading", "subsidy"))
+                                "shading", "subsidy"))
   
   lty_var <- 
     ifelse(facet_par == "Exposition",
            "subsidy", ifelse(facet_par == "Resource",
                              "bromsquito", "shading"))
+  
+  # Return values
+  return(c(facet_var, col_var, lty_var))
+  
+}
+
+
+# Select data -------------------------------------------------------------
+get_those_dats <- function(y, x, facet_par, experiment, 
+                           exp1, exp2, mosquitoes){
+  
+  # Decide between facet, colour and lty variables
+  plot_pars <- 
+    select_plot_pars(facet_par)
   
   # Select correct experiment
   if(experiment == "Experiment 1"){
@@ -31,9 +45,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
         dplyr::filter(stringr::str_detect(visit_id, "H")) %>% 
         dplyr::rename(x = visit_id,
                       sample_id = bromeliad_id,
-                      facet = eval(facet_var),
-                      col = eval(col_var),
-                      lty = eval(lty_var)) %>% 
+                      facet = eval(plot_pars[1]),
+                      col = eval(plot_pars[2]),
+                      lty = eval(plot_pars[3])) %>% 
         dplyr::mutate(x = stringr::str_replace_all(x, "H", ""),
                       x = as.numeric(x))
     
@@ -44,9 +58,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
         dplyr::filter(!stringr::str_detect(visit_id, "H")) %>% 
         dplyr::rename(x = date,
                       sample_id = bromeliad_id,
-                      facet = eval(facet_var),
-                      col = eval(col_var),
-                      lty = eval(lty_var))
+                      facet = eval(plot_pars[1]),
+                      col = eval(plot_pars[2]),
+                      lty = eval(plot_pars[3]))
       
     }
     
@@ -57,9 +71,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
       exp2 %>% 
       dplyr::rename(x = date,
                     sample_id = cup_number,
-                    facet = eval(facet_var),
-                    col = eval(col_var),
-                    lty = eval(lty_var))
+                    facet = eval(plot_pars[1]),
+                    col = eval(plot_pars[2]),
+                    lty = eval(plot_pars[3]))
     
     
   }
@@ -79,32 +93,39 @@ get_those_dats <- function(y, x, facet_par, experiment,
       
     } else
   
-  
   # If no2 is asked
-  if(y == "NO2 (nitrite)"){
+  if(y == "NO2"){
     dats <- 
       dats %>% 
       dplyr::rename(y = no2)
       
   } else
   
-  # If no3 are asked
-  if(y == "NO3 (nitrate)"){
+  # If no3 is asked
+  if(y == "NO3"){
     dats <- 
       dats %>% 
       dplyr::rename(y = no3)
   } else
   
-  # If nh4 are asked
-  if(y == "NH4 (ammonium)"){
+  # If nh4 is asked
+  if(y == "NH4"){
     dats <- 
       dats %>% 
       dplyr::rename(y = nh4)
     
   } else
+    
+  # If DIN is asked
+  if(y == "DIN"){
+    dats <- 
+      dats %>% 
+      dplyr::rename(y = DIN)
+    
+  } else
   
   # If po4 is asked
-  if(y == "PO4 (phosphate)"){
+  if(y == "PO4"){
     dats <- 
       dats %>% 
       dplyr::rename(y = po4)
@@ -151,6 +172,20 @@ get_those_dats <- function(y, x, facet_par, experiment,
     
   }  else
   
+  # If mosquito emergence is asked
+  if(y == "Mosquito emergence"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(emergence)) %>% 
+      dplyr::select(cup_number, emergence, shading, subsidy, larvae) %>% 
+      dplyr::group_by(emergence, cup_number, shading, subsidy, larvae) %>% 
+      dplyr::tally() %>% 
+      dplyr::rename(x = emergence,
+                    y = n,
+                    sample_id = cup_number)
+    
+  }  else  
+    
   # If mosquito time to death
   if(y == "Time to death"){
     dats <- 
@@ -165,6 +200,21 @@ get_those_dats <- function(y, x, facet_par, experiment,
       dplyr::mutate(sample_id = NA)
     
   } else
+    
+  # If mosquito time to pupation
+  if(y == "Time to pupation"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(time_pupation)) %>% 
+      dplyr::select(cup_number, time_pupation, shading, subsidy, larvae) %>% 
+      dplyr::group_by(time_pupation, cup_number, shading, subsidy, larvae) %>% 
+      dplyr::tally() %>% 
+      dplyr::rename(x = time_pupation,
+                    y = n) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  } else  
   
   # If mosquito time to emergence
   if(y == "Time to emergence"){
@@ -181,12 +231,49 @@ get_those_dats <- function(y, x, facet_par, experiment,
     
   } 
   
+  # If size of larvae at death
+  if(y == "Larval length at death (mm)"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(size_mm)) %>% 
+      dplyr::select(cup_number, time_death, size_mm, shading, subsidy, larvae) %>% 
+      dplyr::rename(x = time_death,
+                    y = size_mm) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  } 
+  
+  # If dry mass of emerging adults
+  if(y == "Dry mass at emergence (mg)"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(dry_mass_mg)) %>% 
+      dplyr::select(cup_number, time_emergence, dry_mass_mg, shading, subsidy, larvae) %>% 
+      dplyr::rename(x = time_emergence,
+                    y = dry_mass_mg) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  } 
+  
+  # If wing length of emerged adults
+  if(y == "Average wing length of adult (mm)"){
+    dats <- 
+      mosquitoes %>%
+      dplyr::filter(!is.na(wing_length)) %>% 
+      dplyr::select(cup_number, time_emergence, wing_length, shading, subsidy, larvae) %>% 
+      dplyr::rename(x = time_emergence,
+                    y = wing_length) %>% 
+      ## Add blank column
+      dplyr::mutate(sample_id = NA)
+    
+  }
+  
   # Return data
   return(dats) 
   
 }
-
-
 
 # Select y axis label -----------------------------------------------------
 get_y_label <- function(y){
@@ -206,40 +293,46 @@ get_y_label <- function(y){
       
       
       # If no2 is asked
-      if(y == "NO2 (nitrite)"){
+      if(y == "NO2"){
         lab <- 
-          "NO2 (umol/L)"
+          expression(paste("NO"["2"]^"-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
         
       } else
         
         # If no3 is asked
-        if(y == "NO3 (nitrate)"){
+        if(y == "NO3"){
           lab <- 
-            "NO3 (umol/L)"
+            expression(paste("NO"["3"]^"-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
         } else
           
           # If nh4 is asked
-          if(y == "NH4 (ammonium)"){
+          if(y == "NH4"){
             lab <- 
-              "NH4(umol/L)"
+              expression(paste("NH"["4"]^"+"*" concentration (", mu, "mol"*".L"^"-1"*")"))
           } else
             
-            # If po4 is asked
-            if(y == "PO4 (phosphate)"){
+            # If DIN is asked
+            if(y == "DIN"){
               lab <- 
-                "PO4 (umol/L)"
+                expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))
+            } else
+            
+            # If po4 is asked
+            if(y == "PO4"){
+              lab <- 
+                expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
             } else
               
               # If bacterial biomass is asked
               if(y == "Bacteria"){
                 lab <- 
-                  "Approx. n. of bacterial cells (x 10e12/L)"
+                  expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")
               } else
                 
                 # If chlorophyll is asked
                 if(y == "Algae"){
                   lab <- 
-                    "Chlorophyll (ug.L)"
+                    expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))
                 } else
                   
                   # If mosquito death is asked
@@ -255,22 +348,41 @@ get_y_label <- function(y){
                       
                     }  else
                       
-                      # If time to death is asked
-                      if(y == "Time to death"){
+                      # If mosquito emegence is asked
+                      if(y == "Mosquito emergence"){
+                        lab <- 
+                          "n emerged adults per cup"
+                        
+                      }  else
+                      
+                      # If time to death/pupation/emergence is asked
+                      if(stringr::str_detect(y, "Time")){
                         lab <- 
                           "n"
                         
                       }  else
                         
-                        # If time to emergence is asked
-                        if(y == "Time to emergence"){
-                          lab <- 
-                            "n"
+                        # If size of larvae at death
+                        if(y == "Larval length at death (mm)"){
+                            lab <- 
+                              "Individual larval length at death (mm)"
                           
-                        }
-
-  
-  
+                        } else
+                          
+                          # If dry mass of emerging adults
+                          if(y == "Dry mass at emergence (mg)"){
+                            lab <- 
+                              "Individual dry mass at emergence (mg)"
+                            
+                          } else
+                            
+                            # If wing length of emerged adults
+                            if(y == "Average wing length of adult (mm)"){
+                              lab <- 
+                                "Individual average wing length of adult (mm)"
+                              
+                            }
+                        
   # Return label
   return(lab) 
   
@@ -280,9 +392,6 @@ get_y_label <- function(y){
   
 }
 
-
-
-
 # Select x axis label -----------------------------------------------------
 get_x_label <- function(x, y){
   
@@ -291,10 +400,23 @@ get_x_label <- function(x, y){
     lab <-
       "Day of the year"
   }
-  # Small exception with time to death/emergence
+  # Exception with time to death/emergence
   if(stringr::str_detect(y, "Time")){
     lab <-
-      "Number of days"
+      paste("Number of days until", 
+             stringr::str_remove(y, "Time to "))
+  }
+  
+  # Exception for size at death
+  if(y == "Larval length at death (mm)"){
+    lab <-
+      "Number of days until death"
+  }
+  
+  # Exception for dry mass and wing length
+  if(y %in% c("Dry mass at emergence (mg)", "Average wing length of adult (mm)")){
+    lab <-
+      "Number of days until emergence"
   }
   
   # If time series is asked
@@ -313,9 +435,6 @@ get_x_label <- function(x, y){
   
 }
 
-
-
-
 # Make blank plot ---------------------------------------------------------
 blank_plot <- function(dats){
   ## Plot with nothing but 
@@ -331,8 +450,7 @@ blank_plot <- function(dats){
   
 }
 
-
-# Add line to  blank plot -------------------------------------------------
+# Add line to blank plot -------------------------------------------------
 line_blank_plot <- function(blank_plot, dats, y){
   
   ## Colour, linetype and facet all depend on the data
@@ -349,7 +467,7 @@ line_blank_plot <- function(blank_plot, dats, y){
     scale_linetype_discrete(name = NULL)
   
   ## Now some plots need to be logged, depending on y
-  if(y %in% c("NH4 (ammonium)", "Algae")){
+  if(y %in% c("NH4", "Algae")){
     plot <- 
       plot +
       scale_y_continuous(trans = "log10")
@@ -367,7 +485,7 @@ line_blank_plot <- function(blank_plot, dats, y){
   
 }
 
-# Add points to  blank plot -------------------------------------------------
+# Add points to blank plot -------------------------------------------------
 point_blank_plot <- function(blank_plot, dats){
   ## Colour and shape fixed
   return(blank_plot +
@@ -378,7 +496,7 @@ point_blank_plot <- function(blank_plot, dats){
                           color = shading,
                           shape = subsidy),
                       size = 2) +
-           ylim(0, 6) +
+           ylim(0, NA) +
            ## Remove automatic labels on legend
            scale_colour_discrete(name = NULL) +
            scale_shape_discrete(name = NULL))

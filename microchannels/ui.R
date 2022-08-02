@@ -22,6 +22,43 @@ library(shinyWidgets)
 library(here)
 
 
+# Create list of options for buttons in each panel ----------------------------------
+# Experiments
+exp_choices <- 
+  c("Experiment 1", "Experiment 2")
+
+# X axis
+x_choices <- 
+  c("Weekly measurements", "Time series in exp. 1")
+
+# Facet
+facet_choices <- 
+  c("Exposition", "Resource", "Bromeliad/Mosquito")
+
+# Y choices
+y_choices <- 
+  list(HTML(paste0("NO",tags$sub("2"), tags$sup("-"), "(nitrite)")),
+       HTML(paste0("NO",tags$sub("3"), tags$sup("-"), "(nitrate)")),
+       HTML(paste0("NH",tags$sub("4"), tags$sup("+"), "(ammonium)")),
+       "Dissolved inorganic nitrogen (DIN)",
+       HTML(paste0("PO",tags$sub("4"), tags$sup("3-"), "(phosphate)")),
+       "Bacteria", "Algae", "pH", "Temperature",
+       "Mosquito death", "Mosquito pupation", "Mosquito emergence",
+       "Time to death", "Time to pupation", "Time to emergence",
+       "Larval length at death (mm)", "Dry mass at emergence (mg)",
+       "Average wing length of adult (mm)")
+
+# Y values
+y_values <- 
+  c("NO2", "NO3", "NH4", "DIN", "PO4",
+    "Bacteria", "Algae", "pH", "Temperature",
+    "Mosquito death", "Mosquito pupation", "Mosquito emergence",
+    "Time to death", "Time to pupation", "Time to emergence",
+    "Larval length at death (mm)", "Dry mass at emergence (mg)",
+    "Average wing length of adult (mm)")
+
+
+# General dashboard ----------------------------------------------------------------
 # Define UI for application that draws plots of the data
 shinyUI(dashboardPage(
     skin = "purple",
@@ -30,7 +67,7 @@ shinyUI(dashboardPage(
             title = "Microchannels experiments",
             titleWidth = 500 # since we have a long title, we need to extend width element in pixels
         ),
-    
+    withMathJax(),
     # create dashboard body - this is the major UI element
     body= dashboardBody(
         
@@ -47,34 +84,30 @@ shinyUI(dashboardPage(
                        background:#555299;
                        background-color: #555299;
                        }")),
-                       ## Landscape
+                       ## Experiment
                        radioButtons(
                            inputId = "experiment1",
                            label = "Choose experiment",
-                           choices = c("Experiment 1", "Experiment 2"), 
+                           choices = exp_choices, 
                            inline = TRUE),
                        ## X-axis
                        radioButtons(
                            inputId = "x1",
                            label = "X-axis",
-                           choices = c("Weekly measurements", "Time series in exp. 1"), 
+                           choices = x_choices, 
                            inline = TRUE),
                        ## Facet
                        radioButtons(
                            inputId = "facet1",
                            label = "Choose facet",
-                           choices = c("Exposition", "Resource", "Bromeliad/Mosquito"), 
+                           choices = facet_choices, 
                            inline = TRUE),
                        ## Y-axis
                        radioButtons(
                            inputId = "y1",
                            label = "Y-axis",
-                           choices = c("NO2 (nitrite)", "NO3 (nitrate)",
-                                       "NH4 (ammonium)", "PO4 (phosphate)",
-                                       "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death", "Mosquito pupation",
-                                       "Time to death", "Time to emergence"
-                                       ),
+                           choiceNames = y_choices,
+                           choiceValues = y_values,
                            inline = TRUE)
                    ) # end box 1
             ), # end column 1
@@ -86,29 +119,26 @@ shinyUI(dashboardPage(
                        radioButtons(
                            inputId = "experiment2",
                            label = "Choose experiment",
-                           choices = c("Experiment 1", "Experiment 2"), 
+                           choices = exp_choices, 
                            inline = TRUE),
                        ## X-axis
                        radioButtons(
                            inputId = "x2",
                            label = "X-axis",
-                           choices = c("Weekly measurements", "Time series in exp. 1"), 
+                           choices = x_choices, 
                            inline = TRUE),
                        ## Facet
                        radioButtons(
                            inputId = "facet2",
                            label = "Choose facet",
-                           choices = c("Exposition", "Resource", "Bromeliad/Mosquito"), 
+                           choices = facet_choices, 
                            inline = TRUE),
                        ## Y-axis
                        radioButtons(
                            inputId = "y2",
                            label = "Y-axis",
-                           choices = c("NO2 (nitrite)", "NO3 (nitrate)",
-                                       "NH4 (ammonium)", "PO4 (phosphate)",
-                                       "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death", "Mosquito pupation",
-                                       "Time to death", "Time to emergence"),
+                           choiceNames = y_choices,
+                           choiceValues = y_values,
                            inline = TRUE)
                    ) # end box 1
             ) # end column 2
@@ -156,30 +186,27 @@ shinyUI(dashboardPage(
                        radioButtons(
                            inputId = "experiment3",
                            label = "Choose experiment",
-                           choices = c("Experiment 1", "Experiment 2"), 
+                           choices = exp_choices, 
                            inline = TRUE),
                        ## X-axis
                        radioButtons(
                            inputId = "x3",
                            label = "X-axis",
-                           choices = c("Weekly measurements", "Time series in exp. 1"), 
+                           choices = x_choices, 
                            inline = TRUE),
                        ## Factor 1
                        radioButtons(
                            inputId = "facet3",
                            label = "Choose facet",
-                           choices = c("Exposition", "Resource", "Bromeliad/Mosquito"), 
+                           choices = facet_choices, 
                            inline = TRUE),
                        ## Y-axis
                        radioButtons(
-                           inputId = "y3",
-                           label = "Y-axis",
-                           choices = c("NO2 (nitrite)", "NO3 (nitrate)",
-                                       "NH4 (ammonium)", "PO4 (phosphate)",
-                                       "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death", "Mosquito pupation",
-                                       "Time to death", "Time to emergence"),
-                           inline = TRUE)
+                         inputId = "y3",
+                         label = "Y-axis",
+                         choiceNames = y_choices,
+                         choiceValues = y_values,
+                         inline = TRUE)
                    ) # end box 1
             ), # end column 1
             # 1/2 of page (width = 6 of 12 columns)
@@ -190,30 +217,27 @@ shinyUI(dashboardPage(
                        radioButtons(
                            inputId = "experiment4",
                            label = "Choose experiment",
-                           choices = c("Experiment 1", "Experiment 2"), 
+                           choices = exp_choices, 
                            inline = TRUE),
                        ## X-axis
                        radioButtons(
                            inputId = "x4",
                            label = "X-axis",
-                           choices = c("Weekly measurements", "Time series in exp. 1"), 
+                           choices = x_choices, 
                            inline = TRUE),
                        ## Factor 1
                        radioButtons(
                            inputId = "facet4",
                            label = "Choose facet",
-                           choices = c("Exposition", "Resource", "Bromeliad/Mosquito"), 
+                           choices = facet_choices, 
                            inline = TRUE),
                        ## Y-axis
                        radioButtons(
-                           inputId = "y4",
-                           label = "Y-axis",
-                           choices = c("NO2 (nitrite)", "NO3 (nitrate)",
-                                       "NH4 (ammonium)", "PO4 (phosphate)",
-                                       "Bacteria", "Algae", "pH", "Temperature",
-                                       "Mosquito death", "Mosquito pupation",
-                                       "Time to death", "Time to emergence"),
-                           inline = TRUE)
+                         inputId = "y4",
+                         label = "Y-axis",
+                         choiceNames = y_choices,
+                         choiceValues = y_values,
+                         inline = TRUE)
                    ) # end box 1
             ), # end column 2
         ), # end fluidrow
