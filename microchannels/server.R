@@ -132,7 +132,7 @@ shinyServer(function(input, output) {
             get_those_dats(
                 y = input$y4, 
                 x = input$x4, 
-                facet_par = input$facet3,
+                facet_par = input$facet4,
                 experiment = input$experiment4,
                 exp1 = exp1,
                 exp2 = exp2, 
@@ -158,7 +158,7 @@ shinyServer(function(input, output) {
           ## Plot type depends on y
           if(input$y1 %notin% mosq_vars){
             lineplot1 <-
-              line_blank_plot(lineplot1,  plot1_dats(), input$y1)} else
+              line_blank_plot(lineplot1,  plot1_dats(), input$y1, input$facet1, input$experiment1)} else
                 if(input$y1 %in% mosq_vars){
                   lineplot1 <-
                     point_blank_plot(lineplot1,  plot1_dats())}
@@ -188,7 +188,7 @@ shinyServer(function(input, output) {
         ## Plot type depends on y
         if(input$y2 %notin% mosq_vars){
           lineplot2 <-
-            line_blank_plot(lineplot2,  plot2_dats(), input$y2)} else
+            line_blank_plot(lineplot2,  plot2_dats(), input$y2, input$facet2, input$experiment2)} else
               if(input$y2 %in% mosq_vars){
                 lineplot2 <-
                   point_blank_plot(lineplot2,  plot2_dats())}
@@ -220,7 +220,7 @@ shinyServer(function(input, output) {
         ## Plot type depends on y
         if(input$y3 %notin% mosq_vars){
           lineplot3 <-
-            line_blank_plot(lineplot3,  plot3_dats(), input$y3)} else
+            line_blank_plot(lineplot3,  plot3_dats(), input$y3, input$facet3, input$experiment3)} else
               if(input$y3 %in% mosq_vars){
                 lineplot3 <-
                   point_blank_plot(lineplot3,  plot3_dats())}
@@ -250,7 +250,7 @@ shinyServer(function(input, output) {
         ## Plot type depends on y
         if(input$y4 %notin% mosq_vars){
           lineplot4 <-
-            line_blank_plot(lineplot4,  plot4_dats(), input$y4)} else
+            line_blank_plot(lineplot4,  plot4_dats(), input$y4, input$facet4, input$experiment4)} else
               if(input$y4 %in% mosq_vars){
                 lineplot4 <-
                   point_blank_plot(lineplot4,  plot4_dats())}

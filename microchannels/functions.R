@@ -6,7 +6,7 @@ library(stringr)
 
 
 # Select between facet, colour and line parameters ------------------------
-select_plot_pars <- function(facet_par){
+select_plot_pars <- function(facet_par, experiment){
   # Make facet selection flexible
   facet_var <- 
     ifelse(facet_par == "Exposition",
@@ -22,8 +22,64 @@ select_plot_pars <- function(facet_par){
            "subsidy", ifelse(facet_par == "Resource",
                              "bromsquito", "shading"))
   
+  # Give facet names 
+  if(experiment == "Experiment 1")
+  {if(facet_var == "shading")
+    facet_labs <- c(light = "Light", 
+                    shade = "Shade") else
+      if(facet_var == "subsidy")
+        facet_labs <- c(litter_feces = "Litter and feces",
+                        litter_only = "Litter only") else
+          if(facet_var == "bromsquito" & experiment == "Experiment 1") 
+            facet_labs <- c(bromeliad = "Bromeliad",
+                            wax = "Wax")}
+  
+  if(experiment == "Experiment 2")
+  {if(facet_var == "shading")
+    facet_labs <- c(exposed= "Light", 
+                    shaded = "Shade") else
+                      if(facet_var == "subsidy")
+                        facet_labs <- c(litter_feces = "Litter and feces",
+                                        litter = "Litter only") else
+                                          if(facet_var == "bromsquito") 
+                                            facet_labs <- c(absent = "Larvae absent",
+                                                            present = "Larvae present")}
+  
+                              
+                              
+                              
+  
+  # Give col parameters
+  if(col_var == "shading")
+    col_params <- c("Light", "Shade") else
+      if(col_var == "subsidy")
+        col_params <-  c("Litter and feces", "Litter only") else
+          if(col_var == "bromsquito" & experiment == "Experiment 1") 
+            col_params <- c("Bromeliad", "Wax") else
+              col_params <- c("Larvae absent", "Larvae present")
+  
+  # Give col values
+  if(col_var == "shading")
+    col_vals <- c("goldenrod", "grey50") else
+      if(col_var == "subsidy")
+        col_vals <-  c("tan4", "tan1") else
+          if(col_var == "bromsquito" & experiment == "Experiment 1") 
+            col_vals <- c("darkgreen", "gray") else
+              col_vals <- c("gray", "black")
+  
+  # Give lty parameters
+  if(lty_var == "shading")
+    lty_params <- c("Light", "Shade") else
+      if(lty_var == "subsidy")
+        lty_params <-  c("Litter and feces", "Litter only") else
+          if(lty_var == "bromsquito" & experiment == "Experiment 1") 
+            lty_params <- c("Bromeliad", "Wax") else
+              lty_params <- c("Larvae absent", "Larvae present")
+  
+  
   # Return values
-  return(c(facet_var, col_var, lty_var))
+  return(list(facet_var, col_var, lty_var, facet_labs,
+           col_params, col_vals, lty_params))
   
 }
 
@@ -32,9 +88,9 @@ select_plot_pars <- function(facet_par){
 get_those_dats <- function(y, x, facet_par, experiment, 
                            exp1, exp2, mosquitoes){
   
-  # Decide between facet, colour and lty variables
+  # Get plot parameters
   plot_pars <- 
-    select_plot_pars(facet_par)
+    select_plot_pars(facet_par, experiment)
   
   # Select correct experiment
   if(experiment == "Experiment 1"){
@@ -45,9 +101,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
         dplyr::filter(stringr::str_detect(visit_id, "H")) %>% 
         dplyr::rename(x = visit_id,
                       sample_id = bromeliad_id,
-                      facet = eval(plot_pars[1]),
-                      col = eval(plot_pars[2]),
-                      lty = eval(plot_pars[3])) %>% 
+                      facet = eval(plot_pars[[1]]),
+                      col = eval(plot_pars[[2]]),
+                      lty = eval(plot_pars[[3]])) %>% 
         dplyr::mutate(x = stringr::str_replace_all(x, "H", ""),
                       x = as.numeric(x))
     
@@ -58,9 +114,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
         dplyr::filter(!stringr::str_detect(visit_id, "H")) %>% 
         dplyr::rename(x = date,
                       sample_id = bromeliad_id,
-                      facet = eval(plot_pars[1]),
-                      col = eval(plot_pars[2]),
-                      lty = eval(plot_pars[3]))
+                      facet = eval(plot_pars[[1]]),
+                      col = eval(plot_pars[[2]]),
+                      lty = eval(plot_pars[[3]]))
       
     }
     
@@ -71,9 +127,9 @@ get_those_dats <- function(y, x, facet_par, experiment,
       exp2 %>% 
       dplyr::rename(x = date,
                     sample_id = cup_number,
-                    facet = eval(plot_pars[1]),
-                    col = eval(plot_pars[2]),
-                    lty = eval(plot_pars[3]))
+                    facet = eval(plot_pars[[1]]),
+                    col = eval(plot_pars[[2]]),
+                    lty = eval(plot_pars[[3]]))
     
     
   }
@@ -146,7 +202,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
     } else
   
   # If mosquito death is asked
-  if(y == "Mosquito death"){
+  if(y == "Mosquito death" & experiment == "Experiment 2"){
         dats <- 
           mosquitoes %>% 
           dplyr::filter(!is.na(death)) %>% 
@@ -159,7 +215,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
       } else  
         
   # If mosquito pupation is asked
-  if(y == "Mosquito pupation"){
+  if(y == "Mosquito pupation" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(pupation)) %>% 
@@ -173,7 +229,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   }  else
   
   # If mosquito emergence is asked
-  if(y == "Mosquito emergence"){
+  if(y == "Mosquito emergence" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(emergence)) %>% 
@@ -187,7 +243,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   }  else  
     
   # If mosquito time to death
-  if(y == "Time to death"){
+  if(y == "Time to death" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(time_death)) %>% 
@@ -202,7 +258,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   } else
     
   # If mosquito time to pupation
-  if(y == "Time to pupation"){
+  if(y == "Time to pupation" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(time_pupation)) %>% 
@@ -217,7 +273,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   } else  
   
   # If mosquito time to emergence
-  if(y == "Time to emergence"){
+  if(y == "Time to emergence" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(time_emergence)) %>% 
@@ -232,7 +288,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   } 
   
   # If size of larvae at death
-  if(y == "Larval length at death (mm)"){
+  if(y == "Larval length at death (mm)" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(size_mm)) %>% 
@@ -245,7 +301,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   } 
   
   # If dry mass of emerging adults
-  if(y == "Dry mass at emergence (mg)"){
+  if(y == "Dry mass at emergence (mg)" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(dry_mass_mg)) %>% 
@@ -258,7 +314,7 @@ get_those_dats <- function(y, x, facet_par, experiment,
   } 
   
   # If wing length of emerged adults
-  if(y == "Average wing length of adult (mm)"){
+  if(y == "Average wing length of adult (mm)" & experiment == "Experiment 2"){
     dats <- 
       mosquitoes %>%
       dplyr::filter(!is.na(wing_length)) %>% 
@@ -435,6 +491,7 @@ get_x_label <- function(x, y){
   
 }
 
+
 # Make blank plot ---------------------------------------------------------
 blank_plot <- function(dats){
   ## Plot with nothing but 
@@ -451,7 +508,11 @@ blank_plot <- function(dats){
 }
 
 # Add line to blank plot -------------------------------------------------
-line_blank_plot <- function(blank_plot, dats, y){
+line_blank_plot <- function(blank_plot, dats, y, facet_par, experiment){
+  
+  # Get plotting parameters
+  plot_pars <- 
+    select_plot_pars(facet_par, experiment)
   
   ## Colour, linetype and facet all depend on the data
   plot <- 
@@ -461,10 +522,15 @@ line_blank_plot <- function(blank_plot, dats, y){
                   y = y,
                   color = col,
                   linetype = lty)) +
-    facet_wrap(~ facet) +
+    facet_wrap(~ facet,
+               labeller = as_labeller(plot_pars[[4]])) +
     ## Remove automatic labels on legend
-    scale_colour_discrete(name = NULL) +
-    scale_linetype_discrete(name = NULL)
+    scale_colour_manual(name = NULL,
+                        labels = plot_pars[[5]],
+                        values = plot_pars[[6]]) +
+    scale_linetype_manual(name = NULL,
+                          labels = plot_pars[[7]],
+                          values = c(1,2))
   
   ## Now some plots need to be logged, depending on y
   if(y %in% c("NH4", "Algae")){
@@ -498,8 +564,12 @@ point_blank_plot <- function(blank_plot, dats){
                       size = 2) +
            ylim(0, NA) +
            ## Remove automatic labels on legend
-           scale_colour_discrete(name = NULL) +
-           scale_shape_discrete(name = NULL))
+           scale_colour_manual(name = NULL,
+                                 labels = c("Exposed", "Shaded"),
+                                 values = c("goldenrod", "grey50")) +
+           scale_shape_manual(name = NULL,
+                              labels = c("Litter only", "Litter and feces"),
+                              values = c(17, 16)))
   
   
 }

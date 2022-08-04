@@ -67,7 +67,6 @@ shinyUI(dashboardPage(
             title = "Microchannels experiments",
             titleWidth = 500 # since we have a long title, we need to extend width element in pixels
         ),
-    withMathJax(),
     # create dashboard body - this is the major UI element
     body= dashboardBody(
         
