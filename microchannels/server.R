@@ -63,8 +63,10 @@ shinyServer(function(input, output) {
         read.csv(here::here("appdata", 
                             "weekly_measurements_exp2.csv")) %>% 
       dplyr::rename(bromsquito = larvae) %>% 
-      ## Make dissolved inorganic nitrogen column
-      dplyr::mutate(DIN = no2 + no3 + nh4)
+      ## Make dissolved inorganic nitrogen column, make subisdy category same than exp1
+      dplyr::mutate(DIN = no2 + no3 + nh4,
+                    subsidy = ifelse(subsidy == "litter",
+                                     "litter_only", subsidy))
     
     mosquitoes <- 
         read.csv(here::here("appdata", 

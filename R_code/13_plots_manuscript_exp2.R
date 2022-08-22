@@ -60,7 +60,7 @@ chloro_exp2_bactnut_coefs <-
                     colour = shading)) +
     scale_y_continuous(trans = "log",
                        breaks = c(1, 20, 50, 400)) +
-    xlab(expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")) +
+    xlab(expression("Bacteria concentration (x"*"10"^"12"*""*".L"^"-1"*")")) +
     ylab(expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))) +
     scale_colour_manual(name = "Light exposure",
                         labels = c("Exposed", "Shaded"), 
@@ -100,8 +100,10 @@ legend_2 <-
                 aes(x = din_scale,
                     y = bact,
                     colour = shading)) +
+    scale_y_continuous(trans = "log",
+                       breaks = c(0, 1, 6)) +
     xlab(expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab(expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")) +
+    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
     scale_colour_manual(name = "Light exposure",
                         labels = c("Exposed", "Shaded"), 
                         values = c("goldenrod", "grey50")) +
@@ -121,12 +123,14 @@ legend_2 <-
                colour = shading,
                fill = shading)) +
     geom_smooth(method = 'glm') +
+    scale_y_continuous(trans = "log",
+                       breaks = c(1, 6, 30))+
     geom_jitter(data = exp2_center,
                 aes(x = chloro_scale,
                     y = bact,
                     colour = shading)) +
     xlab(expression(paste("Chlorophyll-a concentration (", mu, "g"*".L"^"-1"*")"))) +
-    ylab(expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")) +
+    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
     scale_colour_manual(name = "Light exposure",
                         labels = c("Exposed", "Shaded"), 
                         values = c("goldenrod", "grey50")) +
@@ -166,7 +170,7 @@ legend_2 <-
                 alpha = 0.3) +
     scale_x_discrete(name = "Terrestrial subsidy",
                      labels = c("Litter only", "Litter and feces")) +
-    ylab(expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")) +
+    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
     scale_colour_manual(name = "Light exposure",
                         labels = c("Exposed", "Shaded"), 
                         values = c("goldenrod", "grey50")) +
@@ -450,7 +454,7 @@ ggplot2::ggsave(figures3,
                                              "exp2_figures3.jpeg")))
 
 
-# Figures for presentation  FIX WHEN NEEDED------------------------------------------------
+# Figures for presentation  ------------------------------------------------
 # NH4 and treatments
 ggplot2::ggsave(exp2_nh4_reslight_plot,
                 height = 4,
