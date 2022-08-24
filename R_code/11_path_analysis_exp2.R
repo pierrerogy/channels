@@ -8,7 +8,6 @@ library(ggeffects)
 library(DHARMa)
 library(afex)
 library(ggplot2)
-source("R_code/functions.R")
 
 # Load mosquito data
 mozzies <- 
@@ -59,7 +58,15 @@ exp2 <-
                                1, ifelse(cup_number == 46 & week == "3",
                                          0, n_moz))) %>% 
   ## Add N:P ratio
-  dplyr::mutate(np = din/po4)
+  dplyr::mutate(np = din/po4) %>% 
+  ## Put variables on log scale
+  dplyr::mutate(across(c(din, np),
+                       ~ log(.x),
+                       .names = "{.col}_log"))%>% 
+  ## Put variables on log scale
+  dplyr::mutate(across(po4,
+                       ~.x^(0.5),
+                       .names = "{.col}_sqrt"))
   
 
 # Scale data 
@@ -67,14 +74,14 @@ exp2_center <-
   exp2 %>% 
   ## Center around 0
   dplyr::bind_cols(
-    po4_scale = scale(exp2$po4),
+    po4_scale = scale(exp2$po4_sqrt),
     nh4_scale = scale(exp2$nh4),
     no2_scale = scale(exp2$no2),
     no3_scale = scale(exp2$no3),
-    din_scale = scale(exp2$din),
+    din_scale = scale(exp2$din_log),
     chloro_scale = scale(exp2$chlorophyll_ugL),
     bact_scale = scale(exp2$bact),
-    np_scale = scale(exp2$np)) %>%
+    np_scale = scale(exp2$np_log)) %>%
   ## Remove all NAs
   dplyr::filter(!is.na(nh4_scale) & !is.na(po4_scale) &
                   !is.na(no2_scale) & !is.na(no3_scale) &
@@ -84,7 +91,7 @@ exp2_center <-
 # DIN
 ## Fit model
 din_exp2_reslight <-
-  MCMCglmm::MCMCglmm(log(din + 0.01) ~
+  MCMCglmm::MCMCglmm(din_log ~
                        shading*subsidy,
                      random = ~ week + cup_number, 
                      family = "gaussian",                      
@@ -100,7 +107,7 @@ summary(din_exp2_reslight)
 ## Plot
 {### Data
   exp2_din_reslight_effect <- 
-    as.data.frame(ggeffects::ggpredict(din_exp2_reslight,
+    as.data.frame(ggeffects::ggpredict(model = din_exp2_reslight,
                                        terms = c("shading", "subsidy"),
                                        type = "re",
                                        ci.level = 0.95)) %>% 
@@ -110,12 +117,13 @@ summary(din_exp2_reslight)
   exp2_din_reslight_plot <- 
     ggplot(data = exp2_din_reslight_effect,
            aes(x = shading, 
-               y = predicted), 
+               y = exp(predicted)), 
            colour = subsidy) + 
     geom_point(size = 3,
                aes(colour = subsidy),
                position = position_dodge(0.5)) +
-    geom_errorbar(aes(ymin = conf.low, ymax = conf.high,
+    geom_errorbar(aes(ymin = exp(conf.low), 
+                      ymax = exp(conf.high),
                       colour = subsidy), 
                   width = 0.2,
                   position = position_dodge(0.5)) +
@@ -141,12 +149,12 @@ summary(din_exp2_reslight)
 # PO4
 ## Fit model
 po4_exp2_reslight <-
-  MCMCglmm::MCMCglmm(log(po4 + 0.01) ~
+  MCMCglmm::MCMCglmm(po4_sqrt ~
                        shading*subsidy,
                      random = ~ week + cup_number, 
-                     family = "gaussian", 
-                     nitt = 60000, 
-                     burnin = 5000,
+                     family = "gaussian",                      
+                     nitt = 100000, 
+                     burnin = 10000,
                      thin = 25,
                      data = exp2)
 ## Check asssumptions
@@ -167,12 +175,12 @@ summary(po4_exp2_reslight)
   exp2_po4_reslight_plot <- 
     ggplot(data = exp2_po4_reslight_effect,
            aes(x = shading, 
-               y = predicted), 
+               y = predicted^2), 
            colour = subsidy) + 
     geom_point(size = 3,
                aes(colour = subsidy),
                position = position_dodge(0.5)) +
-    geom_errorbar(aes(ymin = conf.low, ymax = conf.high,
+    geom_errorbar(aes(ymin = conf.low^2, ymax = conf.high^2,
                       colour = subsidy), 
                   width = 0.2,
                   position = position_dodge(0.5)) +
@@ -297,6 +305,65 @@ summary(temperature_exp2_reslight)
     xlab("Light exposure") +
     scale_x_discrete(labels = c("Exposed", "Shaded")) +
     ylab("Temperature (°C)") +
+    scale_color_manual(name = "Subsidy",
+                       labels = c("Litter", "Litter + feces"), 
+                       values = c("tan1", "tan4")) +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(), 
+          axis.line = element_line(colour = "black"))
+}
+
+## N:P ratio
+hist(exp2_center$np)
+## Fit model
+np_exp2_reslight <-
+  MCMCglmm::MCMCglmm(np_log ~
+                       shading*subsidy,
+                     random = ~ week + cup_number, 
+                     family = "gaussian",                      
+                     nitt = 100000, 
+                     burnin = 5000,
+                     thin = 50,
+                     data = exp2)
+## Check asssumptions
+plot(np_exp2_reslight$Sol)
+autocorr.diag(np_exp2_reslight$VCV)
+## Test
+summary(np_exp2_reslight)
+## Plot
+{### Data
+  exp2_np_reslight_effect <- 
+    as.data.frame(ggeffects::ggpredict(np_exp2_reslight,
+                                       terms = c("shading", "subsidy"),
+                                       type = "re",
+                                       ci.level = 0.95)) %>% 
+    dplyr::rename(shading = x,
+                  subsidy = group)
+  ### Plot
+  exp2_np_reslight_plot <- 
+    ggplot(data = exp2_np_reslight_effect,
+           aes(x = shading, 
+               y = exp(predicted)), 
+           colour = subsidy) + 
+    geom_point(size = 3,
+               aes(colour = subsidy),
+               position = position_dodge(0.5)) +
+    geom_errorbar(aes(ymin = exp(conf.low), ymax = exp(conf.high),
+                      colour = subsidy), 
+                  width = 0.2,
+                  position = position_dodge(0.5)) +
+    geom_jitter(data = exp2,
+                mapping = aes(x = shading,
+                              y = np,
+                              colour = subsidy),
+                alpha = 0.3) +
+    scale_y_continuous(trans = "log10",
+                       breaks = c(0.1, 1, 5 ,15)) +
+    ggtitle("") +
+    xlab("Light exposure") +
+    scale_x_discrete(labels = c("Exposed", "Shaded")) +
+    ylab(expression(paste("N:P ratio in water"))) +
     scale_color_manual(name = "Subsidy",
                        labels = c("Litter", "Litter + feces"), 
                        values = c("tan1", "tan4")) +
@@ -771,10 +838,10 @@ summary(chloro_exp2_bactnut)
 
 ## Bacteria, highest to lowest
 summary(bact_exp2_chloro)$DIC
-summary(bact_exp2_nutlight)$DIC
-summary(bact_exp2_chloronut)$DIC
 summary(bact_exp2_chlorotreat)$DIC
 summary(bact_exp2_treatlight)$DIC
+summary(bact_exp2_nutlight)$DIC
+summary(bact_exp2_chloronut)$DIC
 summary(bact_exp2_treatnutlight)$DIC
 summary(bact_exp2_all)$DIC
 
@@ -1062,22 +1129,7 @@ AIC(moznut_model)
 
 
 # Quick assessment of N:P ratios  --------
-hist(exp2_center$np)
-## Fit model
-np_exp2_reslight <-
-  MCMCglmm::MCMCglmm(log(np) ~
-                       shading*subsidy,
-                     random = ~ week + cup_number, 
-                     family = "gaussian",                      
-                     nitt = 100000, 
-                     burnin = 1000,
-                     thin = 50,
-                     data = exp2)
-## Check asssumptions
-plot(np_exp2_reslight$Sol)
-autocorr.diag(np_exp2_reslight$VCV)
-## Test
-summary(np_exp2_reslight)
+
 
 exp2_center %>% 
   dplyr::select(shading, subsidy, np) %>% 

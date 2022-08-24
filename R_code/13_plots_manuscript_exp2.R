@@ -81,7 +81,7 @@ chloro_exp2_bactnut_coefs <-
 legend_2 <- 
   cowplot::get_legend(figure2a)
 
-# Nutrients - bacteria
+# DIN - bacteria
 {## Get coefficients
   bact_exp2_all_coefs <- 
     get_coefs(data = exp2_center,
@@ -91,7 +91,7 @@ legend_2 <-
   ## Plot
   figure2c <- 
     ggplot(data = bact_exp2_all_coefs,
-           aes(x = po4_scale,
+           aes(x = din_scale,
                y = fit,
                colour = shading,
                fill = shading)) +
@@ -102,7 +102,7 @@ legend_2 <-
                     colour = shading)) +
     scale_y_continuous(trans = "log",
                        breaks = c(0, 1, 6)) +
-    xlab(expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))) +
+    xlab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
     ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
     scale_colour_manual(name = "Light exposure",
                         labels = c("Exposed", "Shaded"), 
@@ -217,116 +217,16 @@ ggplot2::ggsave(figure2,
                                              "exp2_figure2.jpeg")))
 
 
-# Figure 3 - Models with effects of nutrients on mosquitoes ----------------------------------------------------------------
-# DIN - mosquitoes
-{### Effect
-  moznut_din <- 
-    as.data.frame(ggeffects::ggpredict(moznut_model,
-                                       terms = c("din_scale"),
-                                       type = "re",
-                                       ci.level = 0.95)) %>% 
-    #dplyr::filter(group == "exposed") %>% 
-    dplyr::select(-group)
-  ### Plot
-  figure3a <- 
-    ggplot2::ggplot(data = moznut_din,
-                    aes(x = x,
-                        y = predicted)) +
-    geom_line(colour = "lightcyan3",
-              size = 2) +
-    geom_ribbon(aes(ymin = conf.low, 
-                    ymax = conf.high, 
-                    alpha = 0.2),
-                colour = NA,
-                fill = "lightcyan3") +
-    scale_y_continuous(trans = "log10",
-                       breaks = c(0.0001, 1, 6),
-                       labels = c("0", "1", "6")) +
-    geom_jitter(data = exp2_center %>% 
-                  dplyr::mutate(n_moz = n_moz + 0.0001),
-                aes(x = din_scale,
-                    y = n_moz),
-                colour = "lightcyan3") +
-    xlab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab("Number of larvae in cup") +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-}
-
-# PO4 - mosquitoes
-{### Effect
-  moznuteffect_po4 <- 
-    as.data.frame(ggeffects::ggpredict(moznut_model,
-                                       terms = c("po4_scale"),
-                                       type = "re",
-                                       ci.level = 0.95)) %>% 
-    dplyr::select(-group)
-  ### Plot
-  figure3b <- 
-    ggplot2::ggplot(data = moznuteffect_po4,
-                    aes(x = x,
-                        y = predicted)) +
-    geom_line(colour = "lightcyan3",
-              size = 2) +
-    geom_ribbon(aes(ymin = conf.low, 
-                    ymax = conf.high, 
-                    alpha = 0.2),
-                colour = NA,
-                fill = "lightcyan3") +
-    scale_y_continuous(trans = "log10",
-                       breaks = c(0.0001, 1, 6),
-                       labels = c("0", "1", "6")) +
-    geom_jitter(data = exp2_center %>% 
-                  dplyr::mutate(n_moz = n_moz + 0.0001),
-                aes(x = po4_scale,
-                    y = n_moz),
-                colour = "lightcyan3") +
-    xlab(expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab("Number of larvae in cup") +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-}
-
-## Combine plots
-{
-  figure3 <- 
-    cowplot::plot_grid(figure3a +
-                         ggtitle("a") +
-                         theme(legend.position = "none"),
-                       figure3b +
-                         ggtitle("b") +
-                         theme(legend.position = "none",
-                               axis.title.y = element_blank()),
-                       ncol = 2,
-                       nrow = 1)
-}
-
-## Save plot
-ggplot2::ggsave(figure3,
-                height = 4,
-                width = 8,
-                filename = paste0(here::here("figures",
-                                             "exp2_figure3.jpeg")))
-
-
-
-
 # Figure 4 - Mosquito survival growth and health -----------------------------------
 ## Combine plots
 figure4 <- 
-    cowplot::plot_grid(death_plot +
+    cowplot::plot_grid(avg_timedeath_plot +
                          ggtitle("a") +
                          theme(legend.position = "none"),
-                       sizedeath_plot +
+                       avg_sizedeath_plot +
                          ggtitle("b") +
                          theme(legend.position = "none"),
-                       drymass_plot  +
+                       avg_winglength_plot  +
                          ggtitle("c") +
                          theme(legend.position = "none"),
                        tot_biomass_plot +
@@ -360,23 +260,22 @@ ggplot2::ggsave(figure4,
 figures1 <- 
   cowplot::plot_grid(exp2_din_reslight_plot +
                        ggtitle("a") +
-                       theme(axis.title.x = element_blank(),
-                             axis.text.x = element_blank(),
-                             legend.position = "none"),
+                       theme(legend.position = "none"),
                      exp2_po4_reslight_plot+
                        ggtitle("b") +
-                       theme(axis.title.x = element_blank(),
-                             axis.text.x = element_blank(),
-                             legend.position = "none"),
-                     exp2_pH_reslight_plot+
+                       theme(legend.position = "none"),
+                     exp2_np_reslight_plot +
                        ggtitle("c") +
                        theme(legend.position = "none"),
-                     exp2_temperature_reslight_plot+
+                     exp2_pH_reslight_plot+
                        ggtitle("d") +
                        theme(legend.position = "none"),
-                     nrow = 2,
+                     exp2_temperature_reslight_plot+
+                       ggtitle("e") +
+                       theme(legend.position = "none"),
+                     nrow = 3,
                      ncol = 2,
-                     rel_heights = c(0.8, 1))
+                     rel_heights = c(1, 1, 1))
 
 ## Add legend to grid
 figures1 <- 
@@ -387,7 +286,7 @@ figures1 <-
 
 ## Save plot
 ggplot2::ggsave(figures1,
-                height = 6,
+                height = 8,
                 width = 8,
                 filename = paste0(here::here("figures",
                                              "exp2_figures1.jpeg")))
@@ -395,25 +294,23 @@ ggplot2::ggsave(figures1,
 # Figure S2 - Other mosquito survival, growth and health (indiv) --------
 ## Combine plots
 figures2 <- 
-  cowplot::plot_grid(pupation_plot +
+  cowplot::plot_grid(avg_timepupation_plot +
                        ggtitle("a") +
-                       theme(axis.text.x = element_blank(),
-                             axis.title.x = element_blank(),
-                             legend.position = "none"),
-                     emergence_plot +
+                       theme(legend.position = "none"),
+                     avg_timeemergence_plot +
                        ggtitle("b") +
-                       theme(axis.text.x = element_blank(),
-                             axis.title.x = element_blank(),
-                             legend.position = "none"),
-                     probdeath_plot  +
+                       theme(legend.position = "none"),
+                     prop_probdeath_plot +
                        ggtitle("c") +
                        theme(legend.position = "none"),
-                     wing_plot +
+                     prop_probpup_plot +
                        ggtitle("d") +
                        theme(legend.position = "none"),
+                     prop_probemergence_plot  +
+                       ggtitle("e") +
+                       theme(legend.position = "none"),
                      ncol = 2,
-                     rel_heights = c(0.8, 1),
-                     nrow = 2)
+                     nrow = 3)
 
 
 ## Add legend to grid
@@ -425,80 +322,7 @@ figures2 <-
 
 ## Save plot
 ggplot2::ggsave(figures2,
-                height = 6,
+                height = 10,
                 width = 8,
                 filename = paste0(here::here("figures",
                                              "exp2_figures2.jpeg")))
-# Figure S3 - Other mosquito survival, growth and health (cup) --------
-## Combine plots and legend
-figures3 <- 
-  cowplot::plot_grid(prop_probdeath_plot +
-                       ggtitle("a") +
-                       theme(legend.position = "none"),
-                     prop_probpup_plot +
-                       ggtitle("b") +
-                       theme(legend.position = "none"),
-                     prop_probemergence_plot  +
-                       ggtitle("c") +
-                       theme(legend.position = "none"),
-                     legend_4,
-                     ncol = 2,
-                     nrow = 2)
-
-
-## Save plot
-ggplot2::ggsave(figures3,
-                height = 6,
-                width = 8,
-                filename = paste0(here::here("figures",
-                                             "exp2_figures3.jpeg")))
-
-
-# Figures for presentation  ------------------------------------------------
-# NH4 and treatments
-ggplot2::ggsave(exp2_nh4_reslight_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_nh4treat.jpeg")))
-# Age at death
-ggplot2::ggsave(death_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_agedeath.jpeg")))
-
-# Probability of dying
-ggplot2::ggsave(probdeath_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_probdeath.jpeg")))
-
-# Size at death
-ggplot2::ggsave(sizedeath_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_sizedeath.jpeg")))
-
-# Probability of dying
-ggplot2::ggsave(pupation_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_agepupation.jpeg")))
-
-# Wing length
-ggplot2::ggsave(wing_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_wings.jpeg")))
-
-# Biomass
-ggplot2::ggsave(drymass_plot,
-                height = 4,
-                width = 5,
-                filename = paste0(here::here("figures",
-                                             "exp2_drymass.jpeg")))

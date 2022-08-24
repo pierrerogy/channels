@@ -131,7 +131,7 @@ get_coefs <- function(data, model, bacteria = FALSE, chloro = FALSE, feces = FAL
   if(chloro == TRUE){
     coefs <- 
       data %>% 
-      dplyr::select(shading, po4_scale, chloro_scale) %>% 
+      dplyr::select(shading, din_scale, chloro_scale) %>% 
       dplyr::bind_cols(predict(model, 
                                marginal = model$Random$formula,
                                type = "response",
