@@ -3,8 +3,6 @@
 # Load libraries
 library(tidyverse)
 library(here)
-library(lavaan)
-library(semPlot)
 library(lme4)
 library(ggeffects)
 library(car)
@@ -42,90 +40,6 @@ exp1_before <-
   dplyr::mutate(subsidy_1 = ifelse(subsidy_1 == "litter_feces",
                                    "Litter and feces",
                                    "Litter only"))
-## Make data wide format for lavaan
-exp1_before_wide <- 
-  exp1_before %>% 
-  ## Remove all NAs
-  dplyr::filter(!is.na(po4) & !is.na(DIN) & 
-                  !is.na(bact) & !is.na(chlorophyll_ugL)) %>% 
-  ## Join scaled data
-  dplyr::left_join(exp1_before %>%
-                     ## Scale and rename data
-                     dplyr::mutate_at(vars(po4, DIN, bact, chlorophyll_ugL),
-                                      ~as.numeric(scale(.))) %>% ## make numeric to remove attributes
-                     dplyr::rename_at(vars(po4, DIN, bact, chlorophyll_ugL),
-                                      ~ paste( .x, "scale",sep = "_")),
-                   by = c("visit_id", "bromeliad_id",
-                          "vessel", "shading", "subsidy_1")) %>% 
-  ## Pivot wider
-  tidyr::pivot_wider(names_from = visit_id,
-                     values_from = c(DIN, po4, chlorophyll_ugL, bact,
-                                     DIN_scale, po4_scale, chlorophyll_ugL_scale, bact_scale)) %>%
-  ## Add code for subsidy
-  dplyr::mutate(subsidy_1 = ifelse(subsidy_1 == "Litter only",
-                                 0, 1),
-                vessel = ifelse(vessel == "Wax",
-                                1, 0),
-                shading = ifelse(shading == "light",
-                                 0, 1))
-
-# Path analysis ----------------------------------------------------------
-# Model description 
-SEM_before <- '
-    # Structural relation
-      chlorophyll_ugL_scale_2 ~ b1*shading + b2*subsidy_1 + b3*DIN_scale_2 + b4*po4_scale_2+b31*vessel
-      bact_scale_2 ~ b5*shading + b6*vessel + b7*subsidy_1 + b8*DIN_scale_2 + b9*po4_scale_2
-      DIN_scale_2 ~ b10*vessel + b11*subsidy_1
-      po4_scale_2 ~ b12*vessel + b13*subsidy_1 
-      chlorophyll_ugL_scale_3 ~ b14*shading + b15*subsidy_1 + b16*DIN_scale_3 + b17*po4_scale_3 + b18*chlorophyll_ugL_scale_2+ b32*vessel
-      bact_scale_3 ~ b19*shading + b20*vessel + b21*subsidy_1 + b22*DIN_scale_3 + b23*po4_scale_3 + b24*bact_scale_2
-      DIN_scale_3 ~ b25*vessel + b26*subsidy_1 + b27*DIN_scale_2
-      po4_scale_3 ~ b28*vessel + b29*subsidy_1 + b30*po4_scale_2
-    # Variance structure of exogenous variables
-      vessel ~~ vessel
-      subsidy_1 ~~ subsidy_1
-      shading ~~ shading
-    # Residual covariance
-      po4_scale_2 ~~ DIN_scale_2
-      po4_scale_3 ~~ DIN_scale_3
-      chlorophyll_ugL_scale_2 ~~ bact_scale_2
-      chlorophyll_ugL_scale_3 ~~ bact_scale_3
-    '
-
-# Fit model    
-fit_SEM_before <-
-  lavaan::sem(SEM_before,
-              data = exp1_before_wide,
-              estimator = "ML",
-              meanstructure = F)
-
-# # Explore possible extra paths to improve fit. All fit measures not great. Added a few paths in model above. Not more paths left plausible.
-# View(lavaan::modindices(fit_SEM_before,
-#                         standardized = TRUE,
-#                         sort. = TRUE))
-
-# Summarize output, include standardized estimates and fit measures  
-summary(fit_SEM_before, 
-        rsquare = TRUE, 
-        standardized = TRUE, 
-        fit.measures = TRUE)
-# Here we want:
-# user p value above 0.05
-# CFI above 0.95 
-# TLI above 0.9
-# RMSEA under 0.08
-# SRMR under 0.08
-#
-
-# Visualize 
-semPlot::semPaths(fit_SEM_before, 
-                 shapeMan="rectangle",sizeMan = 14,sizeMan2 = 5,
-                 rotation = 2,layout="tree2",what="std",
-                 posCol="black",edge.width=0.5,
-                 style="Lisrel",edge.label.position=0.3,
-                 fade = F,
-                 edge.label.cex=1)
-
 
 
 # Linear models -----------------------------------------------------------
@@ -139,7 +53,8 @@ din_model_before <-
 # Assumptions
 plot(din_model_before)
 # Tests
-car::Anova(din_model_before)
+car::Anova(din_model_before,
+           type = "3")
 # Plot
 ## Data
 din_effect_before <- 
@@ -157,7 +72,7 @@ din_plot_before <-
   ggtitle("") + 
   ylab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
   xlab("Light exposure") +
-  scale_colour_manual(name = "Vessel",
+  scale_colour_manual(name = "Waxing",
                       labels = c("Bromeliad", "Wax"), 
                       values = c("darkgreen", "gray")) +
   scale_x_discrete(limit = c("exposed", "shaded"),
@@ -182,7 +97,8 @@ po4_model_before <-
 # Assumptions
 plot(po4_model_before)
 # Tests
-car::Anova(po4_model_before)
+car::Anova(po4_model_before,
+           type = "3")
 # Plot
 ## Data
 po4_effect_before <- 
@@ -200,8 +116,8 @@ po4_plot_before <-
   ggtitle("") + 
   ylab(expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))) +
   xlab("Light exposure") +
-  scale_colour_manual(name = "Vessel",
-                      labels = c("Bromeliad", "Wax"), 
+  scale_colour_manual(name = "Waxing",
+                      labels = c("Unwaxed", "Waxed"), 
                       values = c("darkgreen", "gray")) +
   scale_x_discrete(limit = c("exposed", "shaded"),
                    labels = c("Exposed", "Shaded")) +
@@ -225,7 +141,8 @@ bact_model_before <-
 # Assumptions
 plot(bact_model_before)
 # Tests
-car::Anova(bact_model_before)
+car::Anova(bact_model_before,
+           type = "3")
 # Plot
 ## Data
 bact_effect_before <- 
@@ -243,8 +160,8 @@ bact_plot_before <-
   ggtitle("") + 
   ylab(expression("Number of bacterial cells (x"*"10"^"12"*""*".L"^"-1"*")")) +
   xlab("Light exposure") +
-  scale_colour_manual(name = "Vessel",
-                      labels = c("Bromeliad", "Wax"), 
+  scale_colour_manual(name = "Waxing",
+                      labels = c("Unwaxed", "Waxed"), 
                       values = c("darkgreen", "gray")) +
   scale_x_discrete(limit = c("exposed", "shaded"),
                    labels = c("Exposed", "Shaded")) +
@@ -268,7 +185,8 @@ chloro_model_before <-
 # Assumptions
 plot(chloro_model_before)
 # Tests
-car::Anova(chloro_model_before)
+car::Anova(chloro_model_before,
+           type ="3")
 # Plot
 ## Data
 chloro_effect_before <- 
@@ -287,8 +205,8 @@ chloro_plot_before <-
                      breaks = c(2, 20, 80, 140)) +
   ylab(expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))) +
   xlab("Light exposure") +
-  scale_colour_manual(name = "Vessel",
-                      labels = c("Bromeliad", "Wax"), 
+    scale_colour_manual(name = "Waxing",
+                      labels = c("Unwaxed", "Waxed"), 
                       values = c("darkgreen", "gray")) +
   scale_x_discrete(limit = c("exposed", "shaded"),
                    labels = c("Exposed", "Shaded")) +
@@ -303,11 +221,13 @@ chloro_plot_before <-
         axis.title.y = element_text(colour = "black"))
 
 
+
+# Combine plots -----------------------------------------------------------
 # Get legends
 legend <- 
   cowplot::get_legend(bact_plot_before)
 # Combine figures
-figure2 <- 
+figure1 <- 
   cowplot::plot_grid(din_plot_before +
                        ggtitle("A") +
                        theme(legend.position = "none") +
@@ -326,17 +246,18 @@ figure2 <-
                      nrow = 2)
 
 # Combine everything
-figure_2 <- 
-  cowplot::plot_grid(figure2, 
+figure_1 <- 
+  cowplot::plot_grid(figure1, 
                      legend, 
                      ncol = 2,
                      rel_widths = c(1, 0.2))
 # Save figure
 ggsave(here::here("figures",
-                  "exp1_figure2.jpg"),
-       figure_2,
+                  "exp1_figure1.jpg"),
+       figure_1,
        width = 10,
-       height=10)
+       height=10,
+       bg = "white") ## somehow came out with black background
 
 
 
