@@ -8,313 +8,59 @@ source("R_code/functions.R")
 
 
 # Figure 2 - Models with effects of nutrients on all microorganisms ----------------------------------------------------------------
-## Get coefficients for algae
-chloro_exp2_bactnut_coefs <- 
-  get_coefs(data = exp2_center,
-            model = chloro_exp2_bactnut,
-            bacteria = T)
-
-## DIN - algae
-{
-  ## Plot
-  figure2a <- 
-    ggplot(data = chloro_exp2_bactnut_coefs,
-           aes(x = din_scale,
-               y = fit,
-               colour = shading,
-               fill = shading)) +
-    geom_smooth(method = 'glm') +
-    geom_jitter(data = exp2_center,
-                aes(x = din_scale,
-                    y = chlorophyll_ugL,
-                    colour = shading)) +
-    scale_y_continuous(trans = "log",
-                       breaks = c(1, 20, 50, 400)) +
-    xlab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab(expression(paste("Chlorophyll-a concentration (",mu, "g."*"L"^"-1"*")"))) +
-    scale_colour_manual(name = "Light exposure",
-                        labels = c("Exposed", "Shaded"), 
-                        values = c("goldenrod", "grey50")) +
-    scale_fill_manual(name = "Light exposure",
-                      labels = c("Exposed", "Shaded"), 
-                      values = c("goldenrod", "grey50")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  }
-
-## Bacteria - algae
-{
-  ## Plot
-  figure2b <- 
-    ggplot(data = chloro_exp2_bactnut_coefs,
-           aes(x = bact_scale,
-               y = fit,
-               colour = shading,
-               fill = shading)) +
-    geom_smooth(method = 'glm') +
-    geom_jitter(data = exp2_center,
-                aes(x = bact_scale,
-                    y = chlorophyll_ugL,
-                    colour = shading)) +
-    scale_y_continuous(trans = "log",
-                       breaks = c(1, 20, 50, 400)) +
-    xlab(expression("Bacteria concentration (x"*"10"^"12"*""*".L"^"-1"*")")) +
-    ylab(expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))) +
-    scale_colour_manual(name = "Light exposure",
-                        labels = c("Exposed", "Shaded"), 
-                        values = c("goldenrod", "grey50")) +
-    scale_fill_manual(name = "Light exposure",
-                      labels = c("Exposed", "Shaded"), 
-                      values = c("goldenrod", "grey50")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  
-  
-  
-}
-
-## Get legend
+# Get legend
 legend_2 <- 
-  cowplot::get_legend(figure2a)
+  cowplot::get_legend(plot1)
 
-# DIN - bacteria
-{## Get coefficients
-  bact_exp2_all_coefs <- 
-    get_coefs(data = exp2_center,
-              model = bact_exp2_all,
-              chloro = T)
-  
-  ## Plot
-  figure2c <- 
-    ggplot(data = bact_exp2_all_coefs,
-           aes(x = din_scale,
-               y = fit,
-               colour = shading,
-               fill = shading)) +
-    geom_smooth(method = 'glm') +
-    geom_jitter(data = exp2_center,
-                aes(x = din_scale,
-                    y = bact,
-                    colour = shading)) +
-    scale_y_continuous(trans = "log",
-                       breaks = c(0, 1, 6)) +
-    xlab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
-    scale_colour_manual(name = "Light exposure",
-                        labels = c("Exposed", "Shaded"), 
-                        values = c("goldenrod", "grey50")) +
-    scale_fill_manual(name = "Light exposure",
-                      labels = c("Exposed", "Shaded"), 
-                      values = c("goldenrod", "grey50")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  
-  ## Plot
-  figure2d <- 
-    ggplot(data = bact_exp2_all_coefs,
-           aes(x = chloro_scale,
-               y = fit,
-               colour = shading,
-               fill = shading)) +
-    geom_smooth(method = 'glm') +
-    scale_y_continuous(trans = "log",
-                       breaks = c(1, 6, 30))+
-    geom_jitter(data = exp2_center,
-                aes(x = chloro_scale,
-                    y = bact,
-                    colour = shading)) +
-    xlab(expression(paste("Chlorophyll-a concentration (", mu, "g"*".L"^"-1"*")"))) +
-    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
-    scale_colour_manual(name = "Light exposure",
-                        labels = c("Exposed", "Shaded"), 
-                        values = c("goldenrod", "grey50")) +
-    scale_fill_manual(name = "Light exposure",
-                      labels = c("Exposed", "Shaded"), 
-                      values = c("goldenrod", "grey50")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  
-  }
-
-# Treatment - bacteria
-{## Get coefficients
-  bact_exp2_all_coefs <- 
-    get_coefs(data = exp2_center,
-              model = bact_exp2_all,
-              feces = T)
-  
-  ## Plot
-  figure2e <- 
-    ggplot(data = bact_exp2_all_coefs,
-           aes(x = subsidy,
-               y = fit,
-               colour = shading)) +
-    geom_point(position = position_dodge(width = 0.5),
-               size = 3) +
-    geom_errorbar(aes(ymin = lwr,
-                      ymax = upr,
-                      colour = shading),
-                  position = position_dodge(width = 0.5)) +
-    geom_jitter(data = exp2_center,
-                aes(x = subsidy,
-                    y = bact,
-                    colour = shading),
-                alpha = 0.3) +
-    scale_x_discrete(name = "Terrestrial subsidy",
-                     labels = c("Litter only", "Litter and feces")) +
-    ylab(expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")) +
-    scale_colour_manual(name = "Light exposure",
-                        labels = c("Exposed", "Shaded"), 
-                        values = c("goldenrod", "grey50")) +
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-  
-}
-
-
-## Combine plots
-{
-  figure2 <- 
-    cowplot::plot_grid(figure2a +
+# Organise plots
+figure2 <- 
+    cowplot::plot_grid(plot45[[1]] +
                          ggtitle("a") +
                          theme(legend.position = "none"),
-                       figure2b +
+                       plot45[[2]] +
                          ggtitle("b") +
                          theme(legend.position = "none",
                                axis.title.y = element_blank()),
-                       legend_2,
-                       figure2c +
+                       plot67[[1]] +
                          ggtitle("c") +
                          theme(legend.position = "none"),
-                       figure2d +
+                       plot67[[2]]  +
                          ggtitle("d") +
                          theme(legend.position = "none",
                                axis.title.y = element_blank()),
-                       figure2e +
+                       plot89[[1]] +
                          ggtitle("e") +
+                         theme(legend.position = "none"),
+                       plot89[[2]]  +
+                         ggtitle("f") +
                          theme(legend.position = "none",
                                axis.title.y = element_blank()),
-                       ncol = 3,
-                       nrow = 2,
-                       rel_widths = c(1, 0.8, 0.8))
-}
+                       plot1011[[1]] +
+                         ggtitle("g") +
+                         theme(legend.position = "none"),
+                       plot1011[[2]]  +
+                         ggtitle("h") +
+                         theme(legend.position = "none",
+                               axis.title.y = element_blank()),
+                       ncol = 2)
 
-## Save plot
+# Add legend
+figure2 <- 
+  cowplot::plot_grid(figure2,
+                     legend_2,
+                     ncol = 2,
+                     rel_widths = c(0.9, 0.1))
+
+# Save plot
 ggplot2::ggsave(figure2,
-                height = 7,
+                height = 11,
                 width = 10,
+                bg = "white",
                 filename = paste0(here::here("figures",
                                              "exp2_figure2.jpeg")))
 
 
-# Figure 3 - Models with effects of nutrients on mosquitoes ----------------------------------------------------------------
-# DIN - mosquitoes
-{### Effect
-  moznut_din <- 
-    as.data.frame(ggeffects::ggpredict(moznut_model,
-                                       terms = c("din_scale"),
-                                       type = "re",
-                                       ci.level = 0.95)) %>% 
-    #dplyr::filter(group == "exposed") %>% 
-    dplyr::select(-group)
-  ### Plot
-  figure3a <- 
-    ggplot2::ggplot(data = moznut_din,
-                    aes(x = x,
-                        y = predicted)) +
-    geom_line(colour = "lightcyan3",
-              size = 2) +
-    geom_ribbon(aes(ymin = conf.low, 
-                    ymax = conf.high, 
-                    alpha = 0.2),
-                colour = NA,
-                fill = "lightcyan3") +
-    scale_y_continuous(trans = "log10",
-                       breaks = c(0.0001, 1, 6),
-                       labels = c("0", "1", "6")) +
-    geom_jitter(data = exp2_center %>% 
-                  dplyr::mutate(n_moz = n_moz + 0.0001),
-                aes(x = din_scale,
-                    y = n_moz),
-                colour = "lightcyan3") +
-    xlab(expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab("Number of live larvae in cup") +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-}
-
-# PO4 - mosquitoes
-{### Effect
-  moznuteffect_po4 <- 
-    as.data.frame(ggeffects::ggpredict(moznut_model,
-                                       terms = c("po4_scale"),
-                                       type = "re",
-                                       ci.level = 0.95)) %>% 
-    dplyr::select(-group)
-  ### Plot
-  figure3b <- 
-    ggplot2::ggplot(data = moznuteffect_po4,
-                    aes(x = x,
-                        y = predicted)) +
-    geom_line(colour = "lightcyan3",
-              size = 2) +
-    geom_ribbon(aes(ymin = conf.low, 
-                    ymax = conf.high, 
-                    alpha = 0.2),
-                colour = NA,
-                fill = "lightcyan3") +
-    scale_y_continuous(trans = "log10",
-                       breaks = c(0.0001, 1, 6),
-                       labels = c("0", "1", "6")) +
-    geom_jitter(data = exp2_center %>% 
-                  dplyr::mutate(n_moz = n_moz + 0.0001),
-                aes(x = po4_scale,
-                    y = n_moz),
-                colour = "lightcyan3") +
-    xlab(expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))) +
-    ylab("Number of live larvae in cup") +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black"))
-}
-
-## Combine plots
-{
-  figure3 <- 
-    cowplot::plot_grid(figure3a +
-                         ggtitle("a") +
-                         theme(legend.position = "none"),
-                       figure3b +
-                         ggtitle("b") +
-                         theme(legend.position = "none",
-                               axis.title.y = element_blank()),
-                       ncol = 2,
-                       nrow = 1)
-}
-
-## Save plot
-ggplot2::ggsave(figure3,
-                height = 4,
-                width = 8,
-                filename = paste0(here::here("figures",
-                                             "exp2_figure3.jpeg")))
-
-# Figure 4 - Mosquito survival growth and health -----------------------------------
+# Figure 3 - Mosquito survival growth and health -----------------------------------
 ## Combine plots
 figure4 <- 
     cowplot::plot_grid(avg_timedeath_plot +

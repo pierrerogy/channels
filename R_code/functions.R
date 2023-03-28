@@ -1,5 +1,8 @@
 # Load necessary packages
-# Functions written by Kaleigh Davis (https://www.kaleighdavis.com/)
+library(tidyverse)
+library(ggplot2)
+library(ggeffects)
+# Nutrient functions written by Kaleigh Davis (https://www.kaleighdavis.com/)
 
 
 # Nutrients ---------------------------------------------------------------
@@ -112,120 +115,283 @@ bact_cal_curve <- function(df) {
 
 
 # Models ------------------------------------------------------------------
-# Get coefficients from model output
-get_coefs <- function(data, model, bacteria = FALSE, chloro = FALSE, feces = FALSE){
+# Get y axis label
+y_axis_label <- function(parameter){
+  # Many forks to get what we want
+  if(parameter == "din")
+    ret <- 
+      expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))
+  if(parameter == "po4")
+    ret <- 
+      expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
+  if(parameter == "np")
+    ret <- 
+      "N:P ratio"
+  if(parameter == "pH")
+    ret <- 
+      "pH"
+  if(parameter == "temperature_C")
+    ret <- 
+      "Temperature (°C)"
+  if(parameter %in% c("chlorophyll_ugL", "bact_log_scale"))
+    ret <- 
+      expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))
+  if(parameter %in% c("po4_log_scale", "din_log_scale", "chlorophyll_ugL_log_scale"))
+    ret <- 
+      expression("Bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")
   
-  ## Extract coefficients if bacteria and no algae
-  if(bacteria == TRUE){
-    coefs <- 
-      data %>% 
-      dplyr::select(shading, din_scale, bact_scale) %>% 
-      dplyr::bind_cols(predict(model, 
-                               marginal = model$Random$formula,
-                               type = "response",
-                               interval = "confidence") %>% 
-                         tibble::as_tibble() %>% 
-                         dplyr::mutate_all(exp))
-  }
-  ## Extract coefficients if no bacteria but algae
-  if(chloro == TRUE){
-    coefs <- 
-      data %>% 
-      dplyr::select(shading, din_scale, chloro_scale) %>% 
-      dplyr::bind_cols(predict(model, 
-                               marginal = model$Random$formula,
-                               type = "response",
-                               interval = "confidence") %>% 
-                         tibble::as_tibble() %>% 
-                         dplyr::mutate_all(exp))
-      
-  }
-  ## Extract coefficients just for feces
-  if(feces == TRUE){
-    ## Get coefficients
-    coefs <- 
-      data %>% 
-      dplyr::select(shading, subsidy) %>% 
-      dplyr::bind_cols(predict(model, 
-                               marginal = model$Random$formula,
-                               type = "response",
-                               interval = "confidence") %>% 
-                         tibble::as_tibble() %>% 
-                         dplyr::mutate_all(exp)) %>% 
-      dplyr::group_by(shading, subsidy) %>% 
-      dplyr::summarise_all(mean)
-  }
-
-  ## Return
-  return(coefs)
+  # Return
+  return(ret)
 }
 
-# Build point coordinates for given predictor, and add confint
-get_points <- function(data, coefs){
-  ## Empty data frame to return
+# Get x axis label
+x_axis_label <- function(parameter){
+  # Three forks
+  if(!stringr::str_detect(string = parameter, pattern = "scale"))
+    ret <- 
+      "Light exposure"
+  if(parameter == "din_log_scale")
+    ret <- expression(paste("Scaled DIN concentration (", mu, "mol"*".L"^"-1"*")"))
+  if(parameter == "po4_log_scale")
+    ret <- 
+      expression(paste("Scaled PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
+  if(parameter == "bact_log_scale")
+    ret <- 
+      expression("Scaled bacteria concentration  (x"*"10"^"12"*""*".L"^"-1"*")")
+  if(parameter == "chlorophyll_ugL_log_scale")
+    ret <- 
+      expression(paste("Scaled chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))
+ 
+  # Return as expression
+  return(ret)
+}
+
+# Generate mock data to predict values for complex models
+generate_mock_data <- function(parameter){
+  # First, generate data over the range of values of the parameter
   ret <- 
-    data.frame()
+   tibble::tibble(parameter = rep(seq(min(eval(parse(text = paste0("exp2_center$", parameter)))), 
+                                      max(eval(parse(text = paste0("exp2_center$", parameter)))),
+                                      by = 0.1),
+                                  times = 4))
   
-  ## Loop going through parameters
-  for(parameter in unique(coefs$what)){
-  ## Get minimum and maximum values for parameter
-  min <- 
-    data %>% 
-    dplyr::select(paste0(parameter, "_scale")) %>% 
-    min(na.rm = TRUE)
-  max <- 
-    data %>% 
-    dplyr::select(paste0(parameter, "_scale")) %>% 
-    max(na.rm = TRUE)
+  # Add custom number of values of treatment values, and rando values for others
+  ret <- 
+    ret %>% 
+    dplyr::mutate(exposure = as.factor(rep(c("exposed", "shaded"),
+                                           each = nrow(ret) / 2)),
+                  subsidy = as.factor(rep(rep(c("litter", "litter_feces"),
+                                              each = nrow(ret) / 4),
+                                          times = 2))) %>% 
+    dplyr::bind_cols(bact_log = 1:nrow(ret),
+                     week = 1:nrow(ret),
+                     cup_number = 1:nrow(ret))
   
-  ## Make vector of points between this min and max, every 0.2
-  values <- 
-    data.frame(predictor = seq(from = min,
-                               to = max,
-                               by = 0.2))
-  
-  ## Get intercept and slope from coefficients
-  equation <- 
-    coefs %>% 
-    dplyr::filter(what == parameter)
-  
-  ## Get points for each intercept and slope
-  for(i in 1:nrow(equation)){
-    ## Get equation parameters
-    row <- 
-      equation[i,]
-    intercept <- 
-      row[3] %>% 
-      pull()
-    slope <- 
-      row[4] %>% 
-      pull()
-    ci <- 
-      row[5] %>% 
-      pull()
-    ## Get prediction for each point of predictor
-    vals <- 
-      values %>% 
-      dplyr::mutate(predicted = intercept + predictor*slope,
-                    ci_low = predicted - ci,
-                    ci_high = predicted + ci,
-                    what = pull(row[1]),
-                    shading = pull(row[2]))
-    
-    ## Stick to ret
+  # Three way fork depending on the independent variable
+  if(parameter == "din_log_scale"){
     ret <- 
       ret %>% 
-      dplyr::bind_rows(vals)
-    }
-    
-   
-      
-    
-    
-  }
+      dplyr::rename(din_log_scale = parameter) %>% 
+      dplyr::mutate(chlorophyll_ugL_log_scale = mean(exp2_center$chlorophyll_ugL_log_scale),
+                    po4_log_scale = mean(exp2_center$po4_log_scale))} else
+                    if(parameter == "chlorophyll_ugL_log_scale"){
+                      ret <- 
+                        ret %>% 
+                        dplyr::rename(chlorophyll_ugL_log_scale = parameter) %>% 
+                        dplyr::mutate(din_log_scale = mean(exp2_center$din_log_scale),
+                                      po4_log_scale = mean(exp2_center$po4_log_scale))} else
+                                      {ret <- 
+                                        ret %>% 
+                                        dplyr::rename(po4_log_scale = parameter) %>% 
+                                        dplyr::mutate(chlorophyll_ugL_log_scale = mean(exp2_center$chlorophyll_ugL_log_scale),
+                                                      din_log_scale = mean(exp2_center$din_log_scale))}
+
+  # Get predicted values
+  ret <- 
+    ret %>% 
+    dplyr::bind_cols(predict.MCMCglmm(model, 
+                                      newdata = ret,
+                                      marginal = model$Random$formula,
+                                      type = "response",
+                                      level = 0.95,
+                                      interval = "prediction"))  %>% 
+    dplyr::rename(predicted = fit,
+                  conf.low = lwr,
+                  conf.high = upr)  
   
-  ## Return
+  # Return predicted values
   return(ret)
   
 }
+
+# Make plots for models 
+plot_model_nice <- function(model, parameter, scale = "none", type){
+  # Prepare data
+  if(parameter == "bact_log_scale"){
+    model_effect <- 
+      tibble::as_tibble(ggeffects::ggpredict(model,
+                                         terms = c("bact_log_scale", "exposure", "subsidy"),
+                                         type = "re",
+                                         ci.level = 0.95)) %>% 
+      dplyr::rename(bact_log_scale = x,
+                    exposure = group,
+                    subsidy = facet)
+    
+  } else
+    if(parameter %in% c("chlorophyll_ugL_log_scale", "po4_log_scale", "din_log_scale")){
+      model_effect <- 
+        generate_mock_data(parameter = parameter)
+    } else 
+      {
+  model_effect <- 
+    as.data.frame(ggeffects::ggpredict(model = model,
+                                       terms = c("exposure", "subsidy"),
+                                       type = "re",
+                                       ci.level = 0.95)) %>% 
+    dplyr::rename(exposure = x,
+                  subsidy = group)}
   
+  # Transform data according to scale
+  if(scale == "log")
+    model_effect <- 
+      model_effect %>% 
+      dplyr::mutate(across(c(predicted, conf.low, conf.high),
+                           ~ exp(.)))
+  if(scale == "sqrt")
+    model_effect <- 
+      model_effect %>% 
+      dplyr::mutate(across(c(predicted, conf.low, conf.high),
+                           ~ .x^2))
+  
+  # Get axes label
+  ylab <- 
+    y_axis_label(parameter)
+  xlab <- 
+    x_axis_label(parameter)
+  
+  # Plot according to model type
+  if(type == "points"){
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = exposure, 
+                 y = predicted), 
+             colour = subsidy) + 
+      geom_point(size = 3,
+                 aes(colour = subsidy),
+                 position = position_dodge(0.5)) +
+      geom_errorbar(aes(ymin = conf.low, 
+                        ymax = conf.high,
+                        colour = subsidy), 
+                    width = 0.2,
+                    position = position_dodge(0.5)) +
+      geom_jitter(data = exp2_center,
+                  mapping = aes(x = exposure,
+                                y = get(parameter),
+                                colour = subsidy),
+                  alpha = 0.3) +
+      scale_y_continuous(trans = "log10") +
+      ggtitle("") +
+      xlab(xlab) +
+      scale_x_discrete(labels = c("Exposed", "Shaded")) +
+      ylab(ylab) +
+      scale_color_manual(name = "Subsidy",
+                         labels = c("Litter", "Litter + feces"), 
+                         values = c("tan1", "tan4")) +
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.line = element_line(colour = "black"))} 
+  
+  ## Another fork depending on which group of microorganism
+  else if(type == "lines" & parameter == "bact_log_scale"){
+    ## Make mini loop to frame depending on exposed or shaded microcosms
+    for(i in 1:length(levels(exp2_center$exposure))){
+    assign(paste0("ret", i),
+           ggplot(data = model_effect %>%  
+                     dplyr::filter(exposure == levels(exp2_center$exposure)[i]),
+                   aes(x = get(parameter), 
+                       y = predicted, 
+                       colour = subsidy,
+                       group = subsidy)) + 
+            geom_line(aes(colour = subsidy)) +
+            geom_ribbon(aes(ymin = conf.low, 
+                            ymax = conf.high,
+                            fill = subsidy), 
+                        colour = NA,
+                        alpha = 0.2) +
+            geom_jitter(size = 3,
+                       data = exp2_center %>% 
+                         dplyr::filter(exposure == levels(exp2_center$exposure)[i]) ,
+                       aes(colour = subsidy,
+                           x = bact_log_scale,
+                           y = chlorophyll_ugL),
+                       height = 0.5) +
+            ggtitle("") +
+            xlab(xlab) +
+            ylab(ylab) +
+            xlim(-2, 2) +
+            scale_y_continuous(trans = "log",
+                               breaks = c(1, 20, 50, 400),
+                               limits = c(0.1, 450)) +
+            scale_color_manual(name = "Subsidy",
+                               labels = c("Litter", "Litter + feces"), 
+                               values = c("tan1", "tan4")) +
+            scale_fill_manual(name = "Subsidy",
+                               labels = c("Litter", "Litter + feces"), 
+                               values = c("tan1", "tan4")) +
+            theme(panel.grid.major = element_blank(), 
+                  panel.grid.minor = element_blank(),
+                  panel.background = element_blank(), 
+                  axis.line = element_line(colour = "black"))) }
+    ## Join together
+    ret <- 
+      list(ret1, ret2)
+  }
+  else if(type == "lines" & parameter %in% c("chlorophyll_ugL_log_scale", "din_log_scale", "po4_log_scale")){
+    ## Make mini loop to frame depending on exposed or shaded microcosms
+    for(i in 1:length(levels(exp2_center$exposure))){
+      assign(paste0("ret", i),
+             ggplot(data = model_effect %>%  
+                      dplyr::filter(exposure == levels(exp2_center$exposure)[i]),
+                    aes(x = get(parameter), 
+                        y = predicted, 
+                        colour = subsidy,
+                        group = subsidy)) + 
+               geom_line(aes(colour = subsidy)) +
+               geom_ribbon(aes(ymin = conf.low, 
+                               ymax = conf.high,
+                               fill = subsidy), 
+                           colour = NA,
+                           alpha = 0.2) +
+               geom_jitter(size = 3,
+                           data = exp2_center %>% 
+                             dplyr::filter(exposure == levels(exp2_center$exposure)[i]) ,
+                           aes(colour = subsidy,
+                               x = get(parameter),
+                               y = bact),
+                           height = 0.5) +
+               ggtitle("") +
+               xlab(xlab) +
+               ylab(ylab) +
+               xlim(-2, 2) +
+               scale_y_continuous(trans = "log",
+                                   breaks = c(1, 2, 5, 10),
+                                   limits = c(0.1, 10)) +
+               scale_color_manual(name = "Subsidy",
+                                  labels = c("Litter", "Litter + feces"), 
+                                  values = c("tan1", "tan4")) +
+               scale_fill_manual(name = "Subsidy",
+                                 labels = c("Litter", "Litter + feces"), 
+                                 values = c("tan1", "tan4")) +
+               theme(panel.grid.major = element_blank(), 
+                     panel.grid.minor = element_blank(),
+                     panel.background = element_blank(), 
+                     axis.line = element_line(colour = "black"))) }
+    ## Join together
+    ret <- 
+      list(ret1, ret2)
+  }
+    
+    # Return
+    return(ret)
+  }
