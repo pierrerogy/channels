@@ -6,7 +6,6 @@ library(ggplot2)
 library(cowplot)
 source("R_code/functions.R")
 
-
 # Figure 2 - Models with effects of nutrients on all microorganisms ----------------------------------------------------------------
 # Get legend
 legend_2 <- 

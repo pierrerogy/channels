@@ -4,7 +4,6 @@ library(ggplot2)
 library(ggeffects)
 # Nutrient functions written by Kaleigh Davis (https://www.kaleighdavis.com/)
 
-
 # Nutrients ---------------------------------------------------------------
 
 
@@ -168,11 +167,11 @@ x_axis_label <- function(parameter){
 
 # Generate mock data to predict values for complex models
 generate_mock_data <- function(parameter){
-  # First, generate data over the range of values of the parameter
+  # First, generate data over the range of values in the plots
   ret <- 
-   tibble::tibble(parameter = rep(seq(min(eval(parse(text = paste0("exp2_center$", parameter)))), 
-                                      max(eval(parse(text = paste0("exp2_center$", parameter)))),
-                                      by = 0.1),
+   tibble::tibble(parameter = rep(seq(-2, 
+                                      2,
+                                      by = 1),
                                   times = 4))
   
   # Add custom number of values of treatment values, and rando values for others
@@ -303,7 +302,7 @@ plot_model_nice <- function(model, parameter, scale = "none", type){
             axis.line = element_line(colour = "black"))} 
   
   ## Another fork depending on which group of microorganism
-  else if(type == "lines" & parameter == "bact_log_scale"){
+  if(type == "lines" & parameter == "bact_log_scale"){
     ## Make mini loop to frame depending on exposed or shaded microcosms
     for(i in 1:length(levels(exp2_center$exposure))){
     assign(paste0("ret", i),
@@ -347,7 +346,9 @@ plot_model_nice <- function(model, parameter, scale = "none", type){
     ret <- 
       list(ret1, ret2)
   }
-  else if(type == "lines" & parameter %in% c("chlorophyll_ugL_log_scale", "din_log_scale", "po4_log_scale")){
+  
+  if(type == "lines" & parameter %in% c("chlorophyll_ugL_log_scale", 
+                                             "din_log_scale", "po4_log_scale")){
     ## Make mini loop to frame depending on exposed or shaded microcosms
     for(i in 1:length(levels(exp2_center$exposure))){
       assign(paste0("ret", i),

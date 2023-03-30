@@ -43,7 +43,7 @@ exp2 <-
                      dplyr::group_by(cup_number, week_of_departure) %>% 
                      dplyr::tally() %>% 
                      dplyr::mutate(cumdeath = cumsum(n),
-                                   ##ake negative to ignore nas later in sum function
+                                   ## Make negative to ignore nas later in sum function
                                    cumdeath = -cumdeath) %>% 
                      dplyr::ungroup() %>% 
                      ## if a mosquito dies a given week, only the next week measurement
