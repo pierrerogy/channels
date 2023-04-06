@@ -1129,9 +1129,6 @@ weekly_measurements <-
   dplyr::mutate(date = lubridate::yday(lubridate::as_date(lubridate::ymd(date)))) 
 
 write.csv(weekly_measurements,
-          "data_exp1/bromeliad_tax_exp.csv",
-          row.names = F)
-write.csv(weekly_measurements,
           "microchannels/appdata/bromeliad_tax_exp.csv",
           row.names = F)
 
@@ -1173,3 +1170,39 @@ for(i in index_vec){
        main = paste0(colnames(weekly_measurements[i])))
 }
 par(mfrow = c(1,1))
+
+
+# SessionInfo -------------------------------------------------------------
+# R version 4.2.1 (2022-06-23 ucrt)
+# Platform: x86_64-w64-mingw32/x64 (64-bit)
+# Running under: Windows 10 x64 (build 22621)
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] cowplot_1.1.1   car_3.1-0       carData_3.0-5   ggeffects_1.1.2 here_1.0.1     
+# [6] forcats_0.5.2   stringr_1.4.1   dplyr_1.1.0     purrr_0.3.4     readr_2.1.3    
+# [11] tidyr_1.2.0     tibble_3.1.8    ggplot2_3.4.0   tidyverse_1.3.2 lmerTest_3.1-3 
+# [16] lme4_1.1-31     Matrix_1.4-1   
+# 
+# loaded via a namespace (and not attached):
+#   [1] httr_1.4.4          jsonlite_1.8.3      splines_4.2.1       modelr_0.1.9       
+# [5] assertthat_0.2.1    stats4_4.2.1        tensorA_0.36.2      googlesheets4_1.0.1
+# [9] cellranger_1.1.0    pbivnorm_0.6.0      numDeriv_2016.8-1.1 pillar_1.8.1       
+# [13] backports_1.4.1     lattice_0.20-45     glue_1.6.2          rvest_1.0.3        
+# [17] minqa_1.2.5         colorspace_2.0-3    pkgconfig_2.0.3     broom_1.0.0        
+# [21] haven_2.5.0         corpcor_1.6.10      scales_1.2.1        tzdb_0.3.0         
+# [25] cubature_2.0.4.5    googledrive_2.0.0   mgcv_1.8-42         generics_0.1.3     
+# [29] ellipsis_0.3.2      withr_2.5.0         cli_3.5.0           mnormt_2.1.0       
+# [33] crayon_1.5.2        magrittr_2.0.3      readxl_1.4.1        fs_1.5.2           
+# [37] fansi_1.0.3         nlme_3.1-157        MASS_7.3-57         xml2_1.3.3         
+# [41] tools_4.2.1         hms_1.1.2           gargle_1.2.0        lifecycle_1.0.3    
+# [45] munsell_0.5.0       reprex_2.0.2        DHARMa_0.4.5        compiler_4.2.1     
+# [49] rlang_1.0.6         grid_4.2.1          nloptr_2.0.3        rstudioapi_0.13    
+# [53] lavaan_0.6-12       boot_1.3-28         gtable_0.3.1        abind_1.4-5        
+# [57] DBI_1.1.3           R6_2.5.1            lubridate_1.8.0     utf8_1.2.2         
+# [61] rprojroot_2.0.3     MCMCglmm_2.33       ape_5.6-2           stringi_1.7.8      
+# [65] parallel_4.2.1      Rcpp_1.0.9          vctrs_0.5.2         dbplyr_2.2.1       
+# [69] tidyselect_1.2.0    coda_0.19-4      
+

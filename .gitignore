@@ -1,7 +1,8 @@
 .Rproj.user
 .Rhistory
-.RData
+.RData*
 .Ruserdata
 preli/
-data/
-data_exp1/
+data_exp2/
+R_code/1*
+microchannels/appdata/*
