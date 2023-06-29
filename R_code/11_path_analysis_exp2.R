@@ -156,34 +156,7 @@ plots1c <-
                   scale = "none",
                   type = "points",
                   data = exp2_center)
-ggplot(data = model_effect,
-       aes(x = exposure, 
-           y = estimate__), 
-       colour = subsidy) + 
-  geom_point(size = 3,
-             aes(colour = subsidy),
-             position = position_dodge(0.5)) +
-  geom_errorbar(aes(ymin = lower__, 
-                    ymax = upper__,
-                    colour = subsidy), 
-                width = 0.2,
-                position = position_dodge(0.5)) +
-  geom_jitter(data = data,
-              mapping = aes(x = exposure,
-                            y = din_log,
-                            colour = subsidy),
-              alpha = 0.3) +
-  ggtitle("") +
-  xlab(xlab) +
-  scale_x_discrete(labels = c("Exposed", "Shaded")) +
-  ylab(ylab) +
-  scale_color_manual(name = "Subsidy",
-                     labels = c("Litter", "Litter + feces"), 
-                     values = c("tan1", "tan4")) +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black"))
+
 ## pH
 ## Fit model
 pH_treatments <-
@@ -986,5 +959,5 @@ ggplot2::ggsave(here::here("figures",
                            "exp2_figure3.jpeg"),
                 plot3,
                 height = 4,
-                width = 11,
+                width = 13,
                 bg  = "white")  

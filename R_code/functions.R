@@ -115,69 +115,123 @@ bact_cal_curve <- function(df) {
 
 # Models ------------------------------------------------------------------
 # Get axis label
-axis_label <- function(parameter){
+axis_label <- function(parameter, axis){
   # Many forks to get what we want
   if(stringr::str_detect(string = parameter, pattern = "din"))
+    ## x
+    if(axis == "x")
+    {ret <- 
+      expression("DIN concentration (log"~mu*"mol"*".L"^"-1"*",scaled and centered)")}
+    ## y
+  else if(axis == "y"){
     ret <- 
-      expression(paste("DIN concentration (", mu, "mol"*".L"^"-1"*")"))
+      expression("DIN concentration (log"~mu*"mol"*".L"^"-1"*")")}
+
   if(stringr::str_detect(string = parameter, pattern = "po4"))
+    ## x
+    if(axis == "x")
+    {ret <- 
+      expression("PO"["4"]^"3-"*" concentration (log"~mu*"mol"*".L"^"-1"*", scaled and centered)")}
+    ## y
+  else if(axis == "y"){
     ret <- 
-      expression(paste("PO"["4"]^"3-"*" concentration (", mu, "mol"*".L"^"-1"*")"))
+      expression("PO"["4"]^"3-"*" concentration (log"~mu*"mol"*".L"^"-1"*")")}
+
   if(parameter == "np_log")
+    ## x
+    if(axis == "x")
+    {ret <- 
+      "N:P ratio (log,s scaled and centered)"}
+  ## y
+  else if(axis == "y"){
     ret <- 
-      "N:P ratio"
+      "N:P ratio (log)"}
+  
+  
   if(parameter == "pH")
     ret <- 
       "pH"
+  
   if(parameter == "temperature_C")
     ret <- 
-      "Temperature (°C)"
+      "Temperature (°C),"
+  
   if(stringr::str_detect(string = parameter, pattern = "chloro"))
+    ## x
+    if(axis == "x")
+    {ret <- 
+      expression("Chlorophyll-a concentration (log"~mu*"g"*".L"^"-1"*", scaled and centered)")}
+  ## y
+  else if(axis == "y"){
     ret <- 
-      expression(paste("Chlorophyll-a concentration (", mu ,"g"*".L"^"-1"*")"))
+      expression("Chlorophyll-a concentration (log"~mu*"g"*".L"^"-1"*")")}
+
+  
   if(stringr::str_detect(string = parameter, pattern = "bact"))
+    ## x
+    if(axis == "x")
+    {ret <- 
+      expression("Bacteria concentration (log x"*" 10"^"12"*""*".L"^"-1"*", scaled and centered)")}
+  ## y
+  else if(axis == "y"){
     ret <- 
-      expression("Bacteria concentration  (x"*" 10"^"12"*""*".L"^"-1"*")")
+      expression("Bacteria concentration (log x"*" 10"^"12"*""*".L"^"-1"*")")}
+  
   if(stringr::str_detect(string = parameter, pattern = "exposure"))
     ret <- 
       "Light exposure"
+  
   if(stringr::str_detect(string = parameter, pattern = "moz"))
     ret <- 
-      "Number of larvae \nin mesocosm"
+      "Number of larvae \nin mesocosm (log)"
+  
   if(stringr::str_detect(string = parameter, pattern = "mass"))
     ret <- 
-      "Dry adult biomass (mg)"
+      "Dry adult biomass (log mg)"
+  
+  
   if(stringr::str_detect(string = parameter, pattern = "death"))
     ret <- 
-      "Age at death (days)"
+      "Age at death (log days)"
+  
   if(parameter == "time_death")
     ret <- 
-      "Age at death (days)"
+      "Age at death (log days)"
+  
+  
   if(parameter == "time_pupation")
     ret <- 
-      "Age at pupation (days)"
+      "Age at pupation (log days)"
+  
+  
   if(parameter == "time_emergence")
     ret <- 
-      "Age at emergence (days)"
-  if(parameter == "death")
-    ret <- 
-      "Survival failure"
+      "Age at emergence (log days)"
+  
   if(parameter == "death")
     ret <- 
       "Individual survival success"
+  
+  
   if(parameter == "pup")
     ret <- 
       "Individual pupation success"
+  
+  
   if(parameter == "emergence")
     ret <- 
       "Individual emergence success"
+  
+  
   if(stringr::str_detect(string = parameter, pattern = "wing"))
     ret <- 
-      "Average wing length (mm)"
+      "Average wing length (log mm)"
+  
+  
   if(stringr::str_detect(string = parameter, pattern = "size"))
     ret <- 
-      "Body length at death (mm)"
-    
+      "Body length at death (log mm)"
+  
   # Return
   return(ret)
 }
@@ -204,9 +258,11 @@ plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
   
   # Get axes label
   ylab <- 
-    axis_label(parameter = yax)
+    axis_label(parameter = yax,
+               axis = "y")
   xlab <- 
-    axis_label(parameter = xax)
+    axis_label(parameter = xax,
+               axis = "x")
   
   # Plot according to model type
   if(type == "points"){
@@ -250,7 +306,8 @@ plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
                      y = get(yax),
                      colour = subsidy), 
                  data = data, 
-                 position = position_jitter(w = 0.8, h = 0)) 
+                 position = position_jitter(w = 0.8, h = 0),
+                 alpha = 0.3) 
     } else
       {ret <- 
         ret +

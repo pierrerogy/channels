@@ -143,7 +143,8 @@ plot4c <-
                   yax = "death",
                   scale = "prob",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(0, 1))
 
 # Proportion of pupating mosquitoes -------------------------------------------------------------------------
 # Model
@@ -166,7 +167,8 @@ plots2c <-
                   yax = "pup",
                   scale = "prob",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(0, 1))
 
 # Biomass of adult -------------------------------------------------------
 # Model
