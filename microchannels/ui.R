@@ -7,15 +7,11 @@
 #    http://shiny.rstudio.com/
 #
 
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 library(viridis)
 library(cowplot)
-library(tidyr)
 library(gridGraphics)
-library(stringr)
 library(data.table)
-library(shiny)
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)

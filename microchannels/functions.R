@@ -1,9 +1,10 @@
 # Functions for app
 
 # Libraries
-library(dplyr)
-library(stringr)
+library(tidyverse)
 
+# Not in
+`%notin%` <-Negate(`%in%`)
 
 # Select between facet, colour and line parameters ------------------------
 select_plot_pars <- function(facet_par, experiment){
@@ -40,7 +41,7 @@ select_plot_pars <- function(facet_par, experiment){
                     shaded = "Shade") else
                       if(facet_var == "subsidy")
                         facet_labs <- c(litter_feces = "Litter and feces",
-                                        litter = "Litter only") else
+                                        litter_only = "Litter only") else
                                           if(facet_var == "bromsquito") 
                                             facet_labs <- c(absent = "Larvae absent",
                                                             present = "Larvae present")}
@@ -494,7 +495,7 @@ get_x_label <- function(x, y){
 
 # Make blank plot ---------------------------------------------------------
 blank_plot <- function(dats){
-  ## Plot with nothing but 
+  tryCatch({## Plot with nothing but 
   return(ggplot(data = dats,
          aes(x = x,
              y = y,
@@ -502,7 +503,9 @@ blank_plot <- function(dats){
     labs(x = NULL, y = NULL, title = NULL) +
     theme_bw() +
     theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())) 
+          panel.grid.minor = element_blank()))},
+  ##returns blank plot if wrong combination of parameter selected
+  error=function(e){return(blank_plot)}) 
   
   
 }
@@ -552,9 +555,19 @@ line_blank_plot <- function(blank_plot, dats, y, facet_par, experiment){
 }
 
 # Add points to blank plot -------------------------------------------------
-point_blank_plot <- function(blank_plot, dats){
+point_blank_plot <- function(blank_plot, dats, y, experiment){
+  # Blank plot if exp 1
+  if(experiment == "Experiment 1"){
+    ret <- 
+      ggplot() +
+      theme_void()
+  } else 
+    
+    # do plot if exp 2
+    {
   ## Colour and shape fixed
-  return(blank_plot +
+  ret <- 
+    blank_plot +
            geom_point(data = dats,
                       position = position_dodge(width = 0.9),
                       aes(x = x,
@@ -569,7 +582,19 @@ point_blank_plot <- function(blank_plot, dats){
                                  values = c("goldenrod", "grey50")) +
            scale_shape_manual(name = NULL,
                               labels = c("Litter only", "Litter and feces"),
-                              values = c(17, 16)))
+                              values = c(17, 16))
   
+  ## To improve visual appeal change y axis scale if time ymax ==1
+  if(y %in% c("Time to pupation", "Time to emergence", 
+              "Mosquito emergence", "Mosquito pupation")){
+    ret <- 
+      ret +
+      scale_y_discrete(limits = c(0, 2),
+                       breaks = c(0, 1, 2),
+                       labels = c(0, 1, 2))
+  }
+  }
+  ## Return 
+  return(ret)
   
 }

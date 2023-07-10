@@ -7,22 +7,16 @@
 #    http://shiny.rstudio.com/
 #
 
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 library(viridis)
 library(cowplot)
-library(tidyr)
 library(gridGraphics)
-library(stringr)
 library(data.table)
-library(shiny)
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(here)
 source(here::here("functions.R"))
-`%notin%` <-Negate(`%in%`)
-  
 
 # Lists of mosquito variables unique to experiment 2 -------------------------------
 mosq_vars <- 
@@ -163,7 +157,7 @@ shinyServer(function(input, output) {
               line_blank_plot(lineplot1,  plot1_dats(), input$y1, input$facet1, input$experiment1)} else
                 if(input$y1 %in% mosq_vars){
                   lineplot1 <-
-                    point_blank_plot(lineplot1,  plot1_dats())}
+                    point_blank_plot(lineplot1,  plot1_dats(), input$y1, input$experiment1)}
 
             
         }
@@ -193,7 +187,7 @@ shinyServer(function(input, output) {
             line_blank_plot(lineplot2,  plot2_dats(), input$y2, input$facet2, input$experiment2)} else
               if(input$y2 %in% mosq_vars){
                 lineplot2 <-
-                  point_blank_plot(lineplot2,  plot2_dats())}
+                  point_blank_plot(lineplot2,  plot2_dats(), input$y2, input$experiment2)}
         
         
         
@@ -225,7 +219,7 @@ shinyServer(function(input, output) {
             line_blank_plot(lineplot3,  plot3_dats(), input$y3, input$facet3, input$experiment3)} else
               if(input$y3 %in% mosq_vars){
                 lineplot3 <-
-                  point_blank_plot(lineplot3,  plot3_dats())}
+                  point_blank_plot(lineplot3,  plot3_dats(), input$y3, input$experiment3)}
 
         
       }
@@ -255,7 +249,7 @@ shinyServer(function(input, output) {
             line_blank_plot(lineplot4,  plot4_dats(), input$y4, input$facet4, input$experiment4)} else
               if(input$y4 %in% mosq_vars){
                 lineplot4 <-
-                  point_blank_plot(lineplot4,  plot4_dats())}
+                  point_blank_plot(lineplot4,  plot4_dats(), input$y4, input$experiment4)}
 
         
       }
