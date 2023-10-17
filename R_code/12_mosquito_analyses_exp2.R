@@ -227,13 +227,13 @@ legend <-
 plots2 <- 
   cowplot::plot_grid(plots2a +
                        theme(legend.position = "none") +
-                       ggtitle("a"),
+                       ggtitle("(a)"),
                      plots2b +
                        theme(legend.position = "none") +
-                       ggtitle("b"),
+                       ggtitle("(b)"),
                      plots2c +
                        theme(legend.position = "none") +
-                       ggtitle("c"),
+                       ggtitle("(c)"),
                      legend,
                      ncol = 2)
 ## Save
@@ -249,19 +249,19 @@ ggplot2::ggsave(here::here("figures",
 plot4 <- 
   cowplot::plot_grid(plot4c +
                        theme(legend.position = "none") +
-                       ggtitle("a"),
+                       ggtitle("(a)"),
                      plot4a +
                        theme(legend.position = "none") +
-                       ggtitle("b"),
+                       ggtitle("(b)"),
                      plot4b +
                        theme(legend.position = "none") +
-                       ggtitle("c"),
+                       ggtitle("(c)"),
                      plot4d +
                        theme(legend.position = "none") +
-                       ggtitle("d"),
+                       ggtitle("(d)"),
                      plot4e +
                        theme(legend.position = "none") +
-                       ggtitle("e"),
+                       ggtitle("(e)"),
                      legend,
                      ncol = 2)
 ## Save

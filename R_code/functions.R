@@ -2,6 +2,8 @@
 library(tidyverse)
 library(ggplot2)
 library(ggeffects)
+library(emmeans)
+library(bayestestR)
 # Nutrient functions written by Kaleigh Davis (https://www.kaleighdavis.com/)
 
 # Nutrients ---------------------------------------------------------------
@@ -121,27 +123,27 @@ axis_label <- function(parameter, axis){
     ## x
     if(axis == "x")
     {ret <- 
-      expression("DIN concentration (log"~mu*"mol"*".L"^"-1"*",scaled and centered)")}
+      expression("DIN concentration (log "~mu*"mol"*".L"^"-1"*",scaled and centered)")}
     ## y
   else if(axis == "y"){
     ret <- 
-      expression("DIN concentration (log"~mu*"mol"*".L"^"-1"*")")}
+      expression("DIN concentration (log "~mu*"mol"*".L"^"-1"*")")}
 
   if(stringr::str_detect(string = parameter, pattern = "po4"))
     ## x
     if(axis == "x")
     {ret <- 
-      expression("PO"["4"]^"3-"*" concentration (log"~mu*"mol"*".L"^"-1"*", scaled and centered)")}
+      expression("PO"["4"]^"3-"*" concentration (log "~mu*"mol"*".L"^"-1"*", scaled and centered)")}
     ## y
   else if(axis == "y"){
     ret <- 
-      expression("PO"["4"]^"3-"*" concentration (log"~mu*"mol"*".L"^"-1"*")")}
+      expression("PO"["4"]^"3-"*" concentration (log "~mu*"mol"*".L"^"-1"*")")}
 
   if(parameter == "np_log")
     ## x
     if(axis == "x")
     {ret <- 
-      "N:P ratio (log,s scaled and centered)"}
+      "N:P ratio (log, scaled and centered)"}
   ## y
   else if(axis == "y"){
     ret <- 
@@ -165,7 +167,6 @@ axis_label <- function(parameter, axis){
   else if(axis == "y"){
     ret <- 
       expression("Chlorophyll-a concentration (log"~mu*"g"*".L"^"-1"*")")}
-
   
   if(stringr::str_detect(string = parameter, pattern = "bact"))
     ## x
@@ -183,12 +184,11 @@ axis_label <- function(parameter, axis){
   
   if(stringr::str_detect(string = parameter, pattern = "moz"))
     ret <- 
-      "Number of larvae \nin mesocosm (log)"
+      "Number of larvae \nin mesocosm (log, scaled and centered)"
   
   if(stringr::str_detect(string = parameter, pattern = "mass"))
     ret <- 
       "Dry adult biomass (log mg)"
-  
   
   if(stringr::str_detect(string = parameter, pattern = "death"))
     ret <- 
@@ -198,11 +198,9 @@ axis_label <- function(parameter, axis){
     ret <- 
       "Age at death (log days)"
   
-  
   if(parameter == "time_pupation")
     ret <- 
       "Age at pupation (log days)"
-  
   
   if(parameter == "time_emergence")
     ret <- 
@@ -212,21 +210,17 @@ axis_label <- function(parameter, axis){
     ret <- 
       "Individual survival success"
   
-  
   if(parameter == "pup")
     ret <- 
       "Individual pupation success"
-  
   
   if(parameter == "emergence")
     ret <- 
       "Individual emergence success"
   
-  
   if(stringr::str_detect(string = parameter, pattern = "wing"))
     ret <- 
       "Average wing length (log mm)"
-  
   
   if(stringr::str_detect(string = parameter, pattern = "size"))
     ret <- 
@@ -239,23 +233,30 @@ axis_label <- function(parameter, axis){
 # Make plots for models 
 plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
   # Prepare data
-    if(yax %in% c("bact_log", "chlorophyll_ugL_log", "n_moz")){
+  if(xax == "n_moz_log_scale"){
+    model_effect <- 
+      brms::conditional_effects(model,
+                                effects = "n_moz_log_scale:subsidy",
+                                conditions = make_conditions(data, 
+                                                             vars = c("exposure")))$`n_moz_log_scale:subsidy`
+  } else
+    if(xax == "bact_log_scale"){
       model_effect <- 
-        purrr::flatten_df(brms::conditional_effects(model,
-                                                    effects = c(xax),
-                                                    method = "fitted")[1])
-    } else 
+        brms::conditional_effects(model,
+                                  effects = "bact_log_scale:exposure")$`bact_log_scale:exposure`
+    } else
+      if(xax == "din_log_scale"){
+        model_effect <- 
+          brms::conditional_effects(model,
+                                    effects = "din_log_scale:exposure")$`din_log_scale:exposure`
+      } else
       {
         model_effect <- 
           brms::conditional_effects(model,
                                     effects = c("subsidy:exposure"),
                                     method = "fitted")$`subsidy:exposure`
-        }
-  
-  # Change n_moz name
-  if(yax == "n_moz")
-  {yax = "n_moz_log"}
-  
+      }
+        
   # Get axes label
   ylab <- 
     axis_label(parameter = yax,
@@ -271,13 +272,13 @@ plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
              aes(x = exposure, 
                  y = estimate__), 
              colour = subsidy) + 
-      geom_point(size = 3,
+      geom_point(size = 5,
                  aes(colour = subsidy),
                  position = position_dodge(0.5)) +
       geom_errorbar(aes(ymin = lower__, 
                         ymax = upper__,
                         colour = subsidy), 
-                    width = 0.2,
+                    width = 0.4,
                     position = position_dodge(0.5)) +
       ggtitle("") +
       xlab(xlab) +
@@ -321,35 +322,180 @@ plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
   
   ## Another fork depending on which group of microorganism
   if(type == "lines"){
-    ## Make mini loop to frame depending on exposed or shaded microcosms
-   ret <- 
-     ggplot(data = model_effect,
-                   aes(x = effect1__, 
-                       y = estimate__)) + 
-            geom_line(colour = "burlywood3") +
-            geom_ribbon(aes(ymin = lower__, 
-                            ymax = upper__,
-                            fill = "burlywood3"), 
-                        colour = NA,
-                        alpha = 0.2) +
-            geom_jitter(size = 3,
-                       data = data,
-                       aes(colour = subsidy,
-                           x = get(xax),
-                           y = get(yax)),
-                       height = 0.5) +
-            guides(fill="none") +
-            ggtitle("") +
-            xlab(xlab) +
-            ylab(ylab) +
-            scale_color_manual(name = "Subsidy",
-                               labels = c("Litter", "Litter + feces"), 
-                               values = c("tan1", "tan4")) +
-            theme(panel.grid.major = element_blank(), 
-                  panel.grid.minor = element_blank(),
-                  panel.background = element_blank(), 
-                  axis.line = element_line(colour = "black")) 
+    ## Little catch for cholophyll, frame without colours
+    if(yax == "chlorophyll_ugL_log"){
+      ret <- 
+        ggplot(data = model_effect,
+               aes(x = effect1__, 
+                   y = estimate__)) + 
+        geom_line(colour = "black") +
+        geom_ribbon(aes(ymin = lower__, 
+                        ymax = upper__,
+                        fill = "grey"), 
+                    colour = NA,
+                    alpha = 0.2) +
+        geom_jitter(size = 3,
+                    data = data,
+                    colour = "grey60",
+                    aes(x = get(xax),
+                        y = get(yax)),
+                    height = 0.5) +
+        guides(fill="none") +
+        ggtitle("") +
+        xlab(xlab) +
+        ylab(ylab) +
+        theme(panel.grid.major = element_blank(), 
+              panel.grid.minor = element_blank(),
+              panel.background = element_blank(), 
+              axis.line = element_line(colour = "black")) 
+      
+    } else
+      ## Frame depending on exposed or shaded microcosms
+    { 
+      ret <- 
+        ggplot(data = model_effect,
+               aes(x = effect1__, 
+                   y = estimate__)) + 
+        geom_line(colour = "burlywood3") +
+        geom_ribbon(aes(ymin = lower__, 
+                        ymax = upper__,
+                        fill = "burlywood3"), 
+                    colour = NA,
+                    alpha = 0.2) +
+        geom_jitter(size = 3,
+                    data = data,
+                    aes(colour = subsidy,
+                        x = get(xax),
+                        y = get(yax)),
+                    height = 0.5) +
+        guides(fill="none") +
+        ggtitle("") +
+        xlab(xlab) +
+        ylab(ylab) +
+        scale_color_manual(name = "Subsidy",
+                           labels = c("Litter", "Litter + feces"), 
+                           values = c("tan1", "tan4")) +
+        theme(panel.grid.major = element_blank(), 
+              panel.grid.minor = element_blank(),
+              panel.background = element_blank(), 
+              axis.line = element_line(colour = "black")) }
+    
+    
+   
   }
+  # If three way interaction
+  if(type == "combo"){
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = effect1__, 
+                 y = estimate__,
+                 colour = subsidy)) + 
+      geom_line() +
+      geom_ribbon(aes(ymin = lower__, 
+                      ymax = upper__,
+                      fill = subsidy), 
+                  colour = NA,
+                  alpha = 0.2) +
+      geom_jitter(size = 3,
+                  data = data,
+                  aes(colour = subsidy,
+                      x = scale(get(xax)),
+                      y = get(yax)),
+                  height = 0.5) +
+      guides(fill="none") +
+      facet_grid(~exposure,
+                 labeller = as_labeller(c(exposed = "Exposed",
+                                          shaded = "Shaded"))) +
+      ggtitle("") +
+      xlab(xlab) +
+      ylab(ylab) +
+      scale_color_manual(name = "Subsidy",
+                         labels = c("Litter", "Litter + feces"), 
+                         values = c("tan1", "tan4")) +
+      scale_fill_manual(name = "Subsidy",
+                        labels = c("Litter", "Litter + feces"), 
+                        values = c("tan1", "tan4")) +
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.line = element_line(colour = "black")) 
+  }
+  # Special case for din
+  if(type == "bact_log_scale"){
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = effect1__, 
+                 y = estimate__,
+                 colour = subsidy)) + 
+      geom_line() +
+      geom_ribbon(aes(ymin = lower__, 
+                      ymax = upper__,
+                      fill = subsidy), 
+                  colour = NA,
+                  alpha = 0.2) +
+      geom_jitter(size = 3,
+                  data = data,
+                  aes(colour = subsidy,
+                      x = scale(get(xax)),
+                      y = log(get(yax))),
+                  height = 0.5) +
+      guides(fill="none") +
+      facet_grid(~exposure,
+                 labeller = as_labeller(c(exposed = "Exposed",
+                                          shaded = "Shaded"))) +
+      ggtitle("") +
+      xlab(xlab) +
+      ylab(ylab) +
+      scale_color_manual(name = "Subsidy",
+                         labels = c("Litter", "Litter + feces"), 
+                         values = c("tan1", "tan4")) +
+      scale_fill_manual(name = "Subsidy",
+                         labels = c("Litter", "Litter + feces"), 
+                         values = c("tan1", "tan4")) +
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.line = element_line(colour = "black")) 
+  }
+  # Special case for bacteria
+  if(type == "din_log_scale"){
+    ret <- 
+      ggplot(data = model_effect,
+             aes(x = effect1__, 
+                 y = estimate__,
+                 colour = subsidy)) + 
+      geom_line() +
+      geom_ribbon(aes(ymin = lower__, 
+                      ymax = upper__,
+                      fill = subsidy), 
+                  colour = NA,
+                  alpha = 0.2) +
+      geom_jitter(size = 3,
+                  data = data,
+                  aes(colour = subsidy,
+                      x = scale(get(xax)),
+                      y = get(yax)),
+                  height = 0.5) +
+      guides(fill="none") +
+      facet_grid(~exposure,
+                 labeller = as_labeller(c(exposed = "Exposed",
+                                          shaded = "Shaded"))) +
+      ggtitle("") +
+      xlab(xlab) +
+      ylab(ylab) +
+      scale_color_manual(name = "Subsidy",
+                         labels = c("Litter", "Litter + feces"), 
+                         values = c("tan1", "tan4")) +
+      scale_fill_manual(name = "Subsidy",
+                        labels = c("Litter", "Litter + feces"), 
+                        values = c("tan1", "tan4")) +
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.line = element_line(colour = "black")) 
+  }
+  
+  
  
     # Return
     return(ret)
@@ -370,3 +516,62 @@ get_eq_models <- function(loo_output){
   # Return
   return(ret)
 }
+
+# Get pairwise contrasts 
+all_tests <- function(model){
+  
+  # Model binary parameters
+  specs <- 
+    c("exposure", "subsidy")
+  
+  # Contrasts
+  contrasts <- 
+    c(# Exposure contrasts
+      "exposed litter - shaded litter",
+      "exposed litter_feces - shaded litter_feces",
+      # Resource contrasts
+      "exposed litter - exposed litter_feces",
+      "shaded litter - shaded litter_feces"
+    )
+  
+  # Model specific slopes
+  slop <- 
+    model %>% 
+    ## Get posterior estimates
+    bayestestR::describe_posterior() %>% 
+    ## Convert to tibble because a bit nicer
+    tibble::as_tibble() %>% 
+    ## Filter those that have number of mosquito larvae
+    dplyr::filter(stringr::str_detect(string = Parameter,
+                                      pattern = "n_moz|bact|chloro|din|po4"))
+  
+  # Get contrasts
+  cont <- 
+    ## Create reference grid to be worked on by emmeans
+    emmeans::ref_grid(model) %>% 
+    ## Get means based on model-specific parameters
+    emmeans::emmeans(specs) %>% 
+    ## Get pairwise differences
+    emmeans:::pairs.emmGrid() %>% 
+    ## Get posterior estimates if difference
+    bayestestR::describe_posterior(rope_range = rope_range(model)) %>% 
+    ## Convert to tibble because a bit nicer
+    tibble::as_tibble() %>% 
+    # Filter contrasts depending on model
+    dplyr::filter(Parameter %in% contrasts) %>% 
+    # Arrange these contrasts to make it easier to read the tables
+    dplyr::arrange(factor(Parameter, 
+                          levels = contrasts))
+
+  # Combine, clean and return
+  ret <- 
+    cont %>% 
+    dplyr::bind_rows(slop) %>% 
+    ## Remove these two columns with interval size
+    dplyr::select(-CI, -ROPE_CI, -Rhat, - ESS) %>% 
+    ## Round these ginormous floats
+    dplyr::mutate(dplyr::across(dplyr::where(is.numeric), \(x)
+                                round(x, digits = 3)))
+  
+  # Return
+  return(ret)}
