@@ -248,7 +248,9 @@ plot_model_nice <- function(model, xax, yax, scale = "none", type, data){
       if(xax == "din_log_scale"){
         model_effect <- 
           brms::conditional_effects(model,
-                                    effects = "din_log_scale:exposure")$`din_log_scale:exposure`
+                                    effects = "din_log_scale:subsidy",
+                                    conditions = make_conditions(model, vars = c("exposure")))$`din_log_scale:subsidy`
+        
       } else
       {
         model_effect <- 

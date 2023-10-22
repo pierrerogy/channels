@@ -667,6 +667,9 @@ plot3d <-
                   type = "din_log_scale",
                   data = exp2_center)
 
+
+
+
 # Compile and save figures ------------------------------------------------
 # Get legend
 legend <- 
