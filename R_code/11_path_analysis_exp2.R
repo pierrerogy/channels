@@ -62,7 +62,7 @@ exp2 <-
   ## Ungroup
   dplyr::ungroup() %>% 
   ## Put variables on log scale
-  dplyr::mutate(across(c(din, po4, np,
+  dplyr::mutate(across(c(din, po4, np, nh4,
                          chlorophyll_ugL, bact),
                        ~ log(.x),
                        .names = "{.col}_log"))%>% 
@@ -80,7 +80,7 @@ exp2_center <-
   ## Rename shading column for next action (contains "din")
   dplyr::rename(exposure = shading) %>% 
   ## Center around 0
-  dplyr::mutate(across(contains(c("din","po4","np","chlorophyll_ugL","bact", "n_moz")),
+  dplyr::mutate(across(contains(c("din","po4","np", "nh4", "chlorophyll_ugL","bact", "n_moz")),
                        ~as.numeric(scale(.)),
                        .names = "{.col}_scale"))
   
@@ -115,7 +115,9 @@ plots1b <-
                   yax = "pH",
                   scale = "none",
                   type = "combo",
-                  data = exp2_center)
+                  data = exp2_center) + 
+  scale_x_continuous(breaks = c(-0.7468991, 1.0577926, 1.2928200, 1.4305151),
+                     labels = c(0, 2, 4, 6))  
 
 ## Temperature
 ## Fit model
@@ -171,14 +173,20 @@ plot2a <-
                   yax = "din_log",
                   scale = "none",
                   type = "points",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(0, 1, 3, 5),
+                     labels = round(exp(c(0, 1, 3, 5))))
 plot2b <- 
   plot_model_nice(model = din_treatments,
                   xax = "n_moz_log_scale",
                   yax = "din_log",
                   scale = "none",
                   type = "combo",
-                  data = exp2_center)
+                  data = exp2_center) + 
+  scale_x_continuous(breaks = c(-0.7468991, 1.0577926, 1.2928200, 1.4305151),
+                     labels = c(0, 2, 4, 6)) +
+  scale_y_continuous(breaks = c(0, 1, 3, 5),
+                     labels = round(exp(c(0, 1, 3, 5))))
 
 # PO4
 ## Fit model
@@ -202,7 +210,9 @@ plot2c <-
                   yax = "po4_log",
                   scale = "none",
                   type = "points",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(0:4),
+                     labels = round(exp(c(0:4))))
 
 # N:P ratio
 ## Fit model
@@ -226,14 +236,20 @@ plot2d <-
                   yax = "np_log",
                   scale = "none",
                   type = "points",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2:2),
+                     labels = c(0.1, 0.4, round(exp(c(0:2)))))
 plot2e <- 
   plot_model_nice(model = np_treatments,
                   xax = "n_moz_log_scale",
                   yax = "np_log",
                   scale = "none",
                   type = "combo",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2:2),
+                     labels = c(0.1, 0.4, round(exp(c(0:2))))) + 
+  scale_x_continuous(breaks = c(-0.7468991, 1.0577926, 1.2928200, 1.4305151),
+                     labels = c(0, 2, 4, 6))
 
 # Step 2.1 - Interacting treatments on microorganisms ------------------------------------
 # Chlorophyll
@@ -627,14 +643,21 @@ plot3a <-
                   yax = "chlorophyll_ugL_log",
                   scale = "none",
                   type = "points",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2.5, 0, 2.5, 5),
+                     labels = c(0.1, round(exp(c(0, 2.5, 5)))))
+  
 plot3b <- 
   plot_model_nice(model = m1,
                   xax = "n_moz_log_scale",
                   yax = "chlorophyll_ugL_log",
                   scale = "none",
                   type = "combo",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2.5, 0, 2.5, 5),
+                     labels = c(0.1, round(exp(c(0, 2.5, 5))))) + 
+  scale_x_continuous(breaks = c(-0.7468991, 1.0577926, 1.2928200, 1.4305151),
+                     labels = c(0, 2, 4, 6))  
 
 # Bacteria
 ## Compare fourteen models
@@ -658,17 +681,22 @@ plot3c <-
                   yax = "bact_log",
                   scale = "none",
                   type = "points",
-                  data = exp2_center)
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2:1),
+                     labels = c(0.1, 0.4, round(exp(c(0:1))))) 
+  
 plot3d <- 
   plot_model_nice(model = m105,
                   xax = "din_log_scale",
                   yax = "bact_log",
                   scale = "none",
                   type = "din_log_scale",
-                  data = exp2_center)
-
-
-
+                  data = exp2_center) +
+  scale_y_continuous(breaks = c(-2:1),
+                     labels = c(0.1, 0.4, round(exp(c(0:1))))) +
+  
+  scale_x_continuous(breaks = c(-2.193882696, -0.458084613, 1.005045314, 1.790112886),
+                     labels = c(0.5, 5, 50, 163))  
 
 # Compile and save figures ------------------------------------------------
 # Get legend
@@ -763,3 +791,44 @@ ggplot2::ggsave(here::here("figures",
                 height = 11,
                 width = 10,
                 bg  = "white")  
+
+# Extra: doing models with ammonia ----------------------------------------
+# Ammonia
+## Fit model
+nh4_treatments <-
+  brms::brm(nh4_log ~
+              exposure*subsidy*n_moz_log_scale + (1|week) + (1|cup_number),
+            iter = 5000,
+            family = gaussian(link = "identity"),    
+            control = list(adapt_delta = 0.92,
+                           max_treedepth = 10),
+            data = exp2_center)
+## Check assumptions
+plot(nh4_treatments)
+bayestestR::describe_posterior(nh4_treatments)
+## Test
+all_tests(model = nh4_treatments)
+### and compare
+all_tests(model = din_treatments)
+### generally similar but just below rope for nh4, negative interaction with mosquitoes
+
+
+# Microorganisms
+# Just bacteria because for algae it was all treatments
+## Fit model
+nh4105 <-
+  brms::brm(bact_log  ~
+              exposure*(subsidy + nh4_log_scale + po4_log_scale + n_moz_log_scale)
+            + (1|week) + (1|cup_number),
+            iter = 5000,
+            family = gaussian(link = "identity"),    
+            control = list(adapt_delta = 0.97,
+                           max_treedepth = 10),
+            data = exp2_center)
+## Check assumptions
+plot(nh4105)
+bayestestR::describe_posterior(nh4105)
+## Test
+all_tests(model = nh4105)
+### and compare
+all_tests(model = m105)

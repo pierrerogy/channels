@@ -50,7 +50,10 @@ plot4a <-
                 yax = "time_death",
                 scale = "log",
                 type = "points",
-                data = mozclean)
+                data = mozclean) +
+  scale_y_continuous(breaks = c(1.5, 2, 2.5,3, 3.5, 4),
+                     labels = round(exp(c(1.5, 2, 2.5,3, 3.5, 4)))) 
+  
 
 # Size at death ------------------------------------------
 # Model
@@ -73,7 +76,9 @@ plot4b <-
                   yax = "size_mm",
                   scale = "log",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(1, 1.25, 1.5, 1.75, 2),
+                     labels = round(exp(c(1, 1.25, 1.5, 1.75, 2)))) 
 
 # Time to pupation ------------------------------------------
 # Model
@@ -96,7 +101,9 @@ plots2a <-
                   yax = "time_pupation",
                   scale = "log",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(2.4, 2.8, 3.2, 3.6),
+                     labels = round(exp(c(2.4, 2.8, 3.2, 3.6)))) 
 
 # Average time to emergence ------------------------------------------
 # Model
@@ -119,7 +126,9 @@ plots2b <-
                   yax = "time_emergence",
                   scale = "log",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(2.8, 3.2, 3.4),
+                     labels = round(exp(c(2.8, 3.2, 3.4)))) 
 
 
 # Probability of dying ------------------------------------------
@@ -191,7 +200,10 @@ plot4d <-
                   yax = "dry_mass_mg",
                   scale = "log",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(-2.5, -2, -1.5, -1),
+                     labels = round(exp(c(-2.5, -2, -1.5, -1)), 
+                                    digits = 2)) 
 
 # Average wing length -----------------------------------------------------
 # Model
@@ -214,7 +226,10 @@ plot4e <-
                   yax = "wing_length",
                   scale = "log",
                   type = "points",
-                  data = mozclean)
+                  data = mozclean) +
+  scale_y_continuous(breaks = c(0.9, 1, 1.1, 1.2, 1.3),
+                     labels = round(exp(c(0.9, 1, 1.1, 1.2, 1.3)), 
+                                    digits = 2)) 
 
 
 # Compile and save figures ------------------------------------------------
