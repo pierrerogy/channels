@@ -123,31 +123,31 @@ axis_label <- function(parameter, axis){
     ## x
     if(axis == "x")
     {ret <- 
-      expression("DIN concentration (log "~mu*"mol"*".L"^"-1"*",scaled and centered)")}
+      expression("DIN concentration ("~mu*"mol"*".L"^"-1"*" on a log and centered scale)")}
     ## y
   else if(axis == "y"){
     ret <- 
-      expression("DIN concentration (log "~mu*"mol"*".L"^"-1"*")")}
+      expression("DIN concentration ("~mu*"mol"*".L"^"-1"*" on a log scale)")}
 
   if(stringr::str_detect(string = parameter, pattern = "po4"))
     ## x
     if(axis == "x")
     {ret <- 
-      expression("PO"["4"]^"3-"*" concentration (log "~mu*"mol"*".L"^"-1"*", scaled and centered)")}
+      expression("PO"["4"]^"3-"*" concentration ("~mu*"mol"*".L"^"-1"*" on a log and centered scale)")}
     ## y
   else if(axis == "y"){
     ret <- 
-      expression("PO"["4"]^"3-"*" concentration (log "~mu*"mol"*".L"^"-1"*")")}
+      expression("PO"["4"]^"3-"*" concentration ("~mu*"mol"*".L"^"-1"*" on a log scale)")}
 
   if(parameter == "np_log")
     ## x
     if(axis == "x")
     {ret <- 
-      "N:P ratio (log, scaled and centered)"}
+      "N:P ratio (on a log and centered scale)"}
   ## y
   else if(axis == "y"){
     ret <- 
-      "N:P ratio (log)"}
+      "N:P ratio (on a log scale)"}
   
   
   if(parameter == "pH")
@@ -162,21 +162,21 @@ axis_label <- function(parameter, axis){
     ## x
     if(axis == "x")
     {ret <- 
-      expression("Chlorophyll-a concentration (log"~mu*"g"*".L"^"-1"*", scaled and centered)")}
+      expression("Chlorophyll-a concentration ("~mu*"g"*".L"^"-1"*" on a log and centered scale)")}
   ## y
   else if(axis == "y"){
     ret <- 
-      expression("Chlorophyll-a concentration (log"~mu*"g"*".L"^"-1"*")")}
+      expression("Chlorophyll-a concentration ("~mu*"g"*".L"^"-1"*" on a log scale)")}
   
   if(stringr::str_detect(string = parameter, pattern = "bact"))
     ## x
     if(axis == "x")
     {ret <- 
-      expression("Bacteria concentration (log x"*" 10"^"12"*""*".L"^"-1"*", scaled and centered)")}
+      expression("Bacteria concentration (log x"*" 10"^"12"*""*".L"^"-1"*" on a log and centered scale)")}
   ## y
   else if(axis == "y"){
     ret <- 
-      expression("Bacteria concentration (log x"*" 10"^"12"*""*".L"^"-1"*")")}
+      expression("Bacteria concentration ("*" 10"^"12"*""*".L"^"-1"*" on a log scale)")}
   
   if(stringr::str_detect(string = parameter, pattern = "exposure"))
     ret <- 
@@ -184,27 +184,27 @@ axis_label <- function(parameter, axis){
   
   if(stringr::str_detect(string = parameter, pattern = "moz"))
     ret <- 
-      "Number of larvae \nin mesocosm (log, scaled and centered)"
+      "Number of larvae \nin mesocosm (on a log and centered scale)"
   
   if(stringr::str_detect(string = parameter, pattern = "mass"))
     ret <- 
-      "Dry adult biomass (log mg)"
+      "Dry adult biomass (mg on a log scale)"
   
   if(stringr::str_detect(string = parameter, pattern = "death"))
     ret <- 
-      "Age at death (log days)"
+      "Age at death (days on a log scale)"
   
   if(parameter == "time_death")
     ret <- 
-      "Age at death (log days)"
+      "Age at death (days on a log scale)"
   
   if(parameter == "time_pupation")
     ret <- 
-      "Age at pupation (log days)"
+      "Age at pupation (days on a log scale)"
   
   if(parameter == "time_emergence")
     ret <- 
-      "Age at emergence (log days)"
+      "Age at emergence (days on a log scale)"
   
   if(parameter == "death")
     ret <- 
@@ -220,11 +220,11 @@ axis_label <- function(parameter, axis){
   
   if(stringr::str_detect(string = parameter, pattern = "wing"))
     ret <- 
-      "Average wing length (log mm)"
+      "Average wing length (mm on a log scale)"
   
   if(stringr::str_detect(string = parameter, pattern = "size"))
     ret <- 
-      "Body length at death (log mm)"
+      "Body length at death (mm on a log scale)"
   
   # Return
   return(ret)
