@@ -10,7 +10,7 @@ Rogy, P., Srivastava D.S. (2023) Bromeliads compete with microorganisms for nutr
 <br>
 
 Experiment 2: <p>
-Rogy, P., Srivastava D.S. (2024) Terrestrial subsidies and light affect an aquatic micro-ecosystem in unexpected ways. Freshwater Biology (Accepted). Links to: [paper](https://github.com/pierrerogy/channels), [data](https://knb.ecoinformatics.org/view/doi:10.5063/F1MK6BC7), [code](https://github.com/pierrerogy/channels/tree/master/R_code).
+Rogy, P., Srivastava D.S. (2024) Terrestrial subsidies and light affect an aquatic micro-ecosystem in unexpected ways. Freshwater Biology (Accepted). Links to: [paper](https://doi.org/10.1111/fwb.14252), [data](https://knb.ecoinformatics.org/view/doi:10.5063/F1MK6BC7), [code](https://github.com/pierrerogy/channels/tree/master/R_code).
 </p>
 <br> 
 
