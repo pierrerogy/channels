@@ -832,3 +832,41 @@ bayestestR::describe_posterior(nh4105)
 all_tests(model = nh4105)
 ### and compare
 all_tests(model = m105)
+
+
+# Extra: linear vs. nonlinear fit for bacteria ----------------------------
+# linear
+m105a <-
+  brms::brm(bact_log  ~
+              exposure*(subsidy + din_log_scale + po4_log_scale + n_moz_log_scale)
+            + (1|week) + (1|cup_number),
+            iter = 5000,
+            family = gaussian(link = "identity"),    
+            control = list(adapt_delta = 0.97,
+                           max_treedepth = 10),
+            data = exp2_center)
+# nonlinear quadratic
+m105b <-
+  brms::brm(bact_log  ~
+              exposure*(subsidy + I(din_log_scale)^2 + I(po4_log_scale)^2  + din_log_scale + po4_log_scale + n_moz_log_scale)
+            + (1|week) + (1|cup_number),
+            iter = 5000,
+            family = gaussian(link = "identity"),    
+            control = list(adapt_delta = 0.97,
+                           max_treedepth = 10),
+            data = exp2_center)
+# nonlinear quadratic and linear
+m105c <-
+  brms::brm(bact_log  ~
+              exposure*(subsidy + I(din_log_scale)^2 + I(po4_log_scale)^2  + n_moz_log_scale)
+            + (1|week) + (1|cup_number),
+            iter = 5000,
+            family = gaussian(link = "identity"),    
+            control = list(adapt_delta = 0.97,
+                           max_treedepth = 10),
+            data = exp2_center)
+# Compare
+brms::loo(m105a, m105b, m105c)
+
+
+
